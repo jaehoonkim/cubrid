@@ -46,7 +46,7 @@ func (s *cubridStmt) Query(args []driver.Value) (driver.Rows, error) {
 	if err != nil {
 		return nil, err
 	}
-	rows := &cubridRows{ c: s.c }
+	rows := &cubridRows{ s: s }
 	return rows, nil
 }
 
