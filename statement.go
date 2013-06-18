@@ -25,7 +25,7 @@ func (s *cubridStmt) Close() error {
 
 func (s *cubridStmt) NumInput() int {
 	var param_cnt C.int
-	param_cnt = C.cci_get_bind_num(s.c.con)
+	param_cnt = C.cci_get_bind_num(s.req)
 	if param_cnt < 0 {
 		fmt.Errorf("cci_get_bind_num err : %d", param_cnt)
 	}

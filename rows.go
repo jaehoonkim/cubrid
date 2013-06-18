@@ -20,7 +20,7 @@ func (rows *cubridRows) Columns() []string {
 	var col_info *C.T_CCI_COL_INFO
 	var stmt_type C.T_CCI_CUBRID_STMT
 	var col_count, idx  C.int
-	col_info = C.cci_get_result_info(rows.s.c.con, &stmt_type, &col_count)
+	col_info = C.cci_get_result_info(rows.s.req, &stmt_type, &col_count)
 	if col_info == nil {
 		return nil
 	}
