@@ -3,9 +3,10 @@ package cubrid
 import (
 	"database/sql"
 	"testing"
-	"fmt"
+//	"fmt"
+	"log"
 )
-
+/*
 func TestCubrid(t *testing.T) {
 	fmt.Println("TestCubrid")
 	db, err := sql.Open("cubrid", "localhost/33000/demodb/dba/1212123")
@@ -15,9 +16,8 @@ func TestCubrid(t *testing.T) {
 
 	defer db.Close()
 }
-
+*/
 func TestPrepare(t *testing.T) {
-	fmt.Println("TestPrepare0")
 	db, err := sql.Open("cubrid", "127.0.0.1/33000/demodb/dba/")
 	defer db.Close()
 	if err != nil {
@@ -26,13 +26,22 @@ func TestPrepare(t *testing.T) {
 	if db.Driver() == nil {
 		t.Fatal(err)
 	}
-	fmt.Println("TestPrepare1")
 	stmt, err := db.Prepare("select * from code")
-	fmt.Println("TestPrepare2")
 	defer stmt.Close()
 	if err != nil {
-		fmt.Println("TestPrepare3")
 		t.Fatal(err)
 	}
-	fmt.Println("TestPreparei end")
+	log.Println("TestPrepare: test...0")
+	rows, err := stmt.Query()
+	defer rows.Close()
+	if err != nil {
+		log.Println(err)
+		t.Fatal(err)
+	}
+	log.Println("TestPrepare: test...1")
+	if rows.Next() == false {
+		log.Println(err)
+		log.Println("=======================")
+		t.Fatal(err)
+	}
 }

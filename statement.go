@@ -7,6 +7,7 @@ import "C"
 import (
 	"database/sql/driver"
 	"fmt"
+	"log"
 )
 
 type cubridStmt struct {
@@ -15,6 +16,7 @@ type cubridStmt struct {
 }
 
 func (s *cubridStmt) Close() error {
+	log.Println("cubridStmt:Close")
 	var err C.int
 	err = C.cci_close_req_handle(s.req)
 	if err == 0 {
@@ -33,7 +35,7 @@ func (s *cubridStmt) NumInput() int {
 }
 
 func (s *cubridStmt) Exec(args []driver.Value) (driver.Result, error) {
-	err := s.exec(args)
+	err := s.execute(args)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +44,8 @@ func (s *cubridStmt) Exec(args []driver.Value) (driver.Result, error) {
 }
 
 func (s *cubridStmt) Query(args []driver.Value) (driver.Rows, error) {
-	err := s.exec(args)
+	log.Println("cubridStmt : Query")
+	err := s.execute(args)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +53,23 @@ func (s *cubridStmt) Query(args []driver.Value) (driver.Rows, error) {
 	return rows, nil
 }
 
-func (s *cubridStmt) exec(args []driver.Value) (error) {
+func (s *cubridStmt) execute(args []driver.Value) (error) {
+	var err C.int
+	var cci_error C.T_CCI_ERROR
+	if args != nil {
+		err := s.bindParam(args)
+		if err != nil {
+			return err
+		}
+	}
+	err = C.cci_execute(s.req, 0, 0, &cci_error)
+	if int(err) < 0 {
+		return fmt.Errorf("cci_execute err: %d, %s", cci_error.err_code, cci_error.err_msg)
+	}
+
 	return nil
 }
 
+func (s *cubridStmt) bindParam(args []driver.Value) error {
+	return nil
+}

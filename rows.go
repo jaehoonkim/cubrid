@@ -1,9 +1,11 @@
 package cubrid
 
 /*
+#include <stdio.h>
+#include <stdlib.h>
 #include "cas_cci.h"
 char* ex_cci_get_result_info_name(T_CCI_COL_INFO* res_info, int index) {
-	return CCI_GET_RESULT_INFO_NAME(res_info, index);
+	return  res_info[index].col_name;
 }
 
 T_CCI_U_TYPE ex_cci_get_result_info_type(T_CCI_COL_INFO* res_info, int index) {
@@ -16,6 +18,7 @@ import (
 	"fmt"
 	"io"
 	"unsafe"
+	"log"
 )
 
 type cubridRows struct {
@@ -23,6 +26,7 @@ type cubridRows struct {
 }
 
 func (rows *cubridRows) Columns() []string {
+	log.Println("cubridRow:Columns")
 	var col_info *C.T_CCI_COL_INFO
 	var stmt_type C.T_CCI_CUBRID_STMT
 	var col_count, idx  C.int
@@ -31,14 +35,17 @@ func (rows *cubridRows) Columns() []string {
 		return nil
 	}
 
-	col_name  := make([]string, col_count)
+	var c_name *C.char
+	col_name  := make([]string, int(col_count))
 	for idx = C.int(0); idx < col_count; idx++ {
-		col_name[idx] = C.GoString(C.ex_cci_get_result_info_name(col_info, idx))
+		c_name = C.ex_cci_get_result_info_name(col_info, idx)
+		col_name[int(idx)] = C.GoString(c_name);
 	}
 	return col_name
 }
 
 func (rows *cubridRows) Close() error {
+	//log.Println("cubridRows:Close")
 	var err C.int
 	err = C.cci_close_req_handle(rows.s.req)
 	if int(err) < 0 {
@@ -48,6 +55,7 @@ func (rows *cubridRows) Close() error {
 }
 
 func (rows *cubridRows) Next(dest []driver.Value) error {
+	log.Println("cubridRows:Next")
 	var err C.int
 	var cci_error C.T_CCI_ERROR
 	var col_info *C.T_CCI_COL_INFO
@@ -61,12 +69,12 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 	if int(err) < 0 {
 		return fmt.Errorf("cursor err: %d, %s", cci_error.err_code, cci_error.err_msg)
 	}
-	
+
 	err = C.cci_fetch(rows.s.req, &cci_error)
 	if int(err) < 0 {
 		return fmt.Errorf("fetch err: %d, %s", cci_error.err_code, cci_error.err_msg)
 	}
-	
+
 	col_info = C.cci_get_result_info(rows.s.req, &stmt_type, &col_count)
 	var columnType C.T_CCI_U_TYPE
 	var i C.int

@@ -8,6 +8,7 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"unsafe"
+	"log"
 )
 
 type cubridConn struct {
@@ -16,6 +17,7 @@ type cubridConn struct {
 
 
 func (c *cubridConn) Prepare(query string) (driver.Stmt, error) {
+	//log.Println("cubridConn:Prepare")
 	var cQuery *C.char = C.CString(query)
 	defer C.free(unsafe.Pointer(cQuery))
 	var req C.int
@@ -31,6 +33,7 @@ func (c *cubridConn) Prepare(query string) (driver.Stmt, error) {
 }
 
 func (c *cubridConn) Close() error {
+	//log.Println("cubridConn:Close")
 	var cci_error C.T_CCI_ERROR
 	var err_no C.int
 	err_no = C.cci_disconnect(c.con, &cci_error)
@@ -45,6 +48,7 @@ func (c *cubridConn) Close() error {
 	이를 off하면 transaction을 사용하는걸로,,
 */
 func (c *cubridConn) Begin() (driver.Tx, error) {
+	//log.Println("cubridConn:Begin")
 	var con C.int
 	var err C.int
 	con = c.con
@@ -57,9 +61,11 @@ func (c *cubridConn) Begin() (driver.Tx, error) {
 }
 
 func (c *cubridConn) Exec(query string, args []driver.Value) (driver.Result, error) {
+	log.Println("cubridConn:Exec")
 	return nil, nil
 }
 
 func (c *cubridConn) Query(query string, args []driver.Value) (driver.Rows, error) {
+	log.Println("cubridConn:Query")
 	return nil, nil
 }

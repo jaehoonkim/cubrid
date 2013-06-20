@@ -2,7 +2,7 @@ package cubrid
 
 /*
 #cgo CFLAGS: -I./CUBRID/include
-#cgo LDFLAGS: -L./CUBRID/lib -lcascci
+#cgo LDFLAGS: -L./CUBRID/lib -lcascci -lnsl
 #include "cas_cci.h"
 */
 import "C"
@@ -27,7 +27,7 @@ func (d *cubridDriver) Open(name string) (driver.Conn, error) {
 	if(len(opt) != 5) {
 		return nil, errors.New("error options")
 	}
-	
+
 	port, _ := strconv.Atoi(opt[1])
 
 	serverAddress := C.CString(opt[0])
