@@ -3,7 +3,7 @@ package cubrid
 import (
 	"database/sql"
 	"testing"
-//	"fmt"
+	"fmt"
 	"log"
 )
 /*
@@ -44,4 +44,9 @@ func TestPrepare(t *testing.T) {
 		log.Println("=======================")
 		t.Fatal(err)
 	}
+
+	var s_name, f_name string
+	rows.Scan(&s_name, &f_name)
+
+	fmt.Printf("s : %s, f : %s\n", s_name, f_name)
 }

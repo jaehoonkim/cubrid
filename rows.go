@@ -5,11 +5,13 @@ package cubrid
 #include <stdlib.h>
 #include "cas_cci.h"
 char* ex_cci_get_result_info_name(T_CCI_COL_INFO* res_info, int index) {
-	return  res_info[index].col_name;
+	return CCI_GET_RESULT_INFO_NAME(res_info, index);
+//	return  res_info[index - 1].col_name;
 }
 
 T_CCI_U_TYPE ex_cci_get_result_info_type(T_CCI_COL_INFO* res_info, int index) {
 	return CCI_GET_RESULT_INFO_TYPE(res_info, index);
+//	return res_info[index - 1].type;
 }
 */
 import "C"
@@ -37,9 +39,10 @@ func (rows *cubridRows) Columns() []string {
 
 	var c_name *C.char
 	col_name  := make([]string, int(col_count))
-	for idx = C.int(0); idx < col_count; idx++ {
+	for idx = C.int(1); idx <= col_count; idx++ {
 		c_name = C.ex_cci_get_result_info_name(col_info, idx)
-		col_name[int(idx)] = C.GoString(c_name);
+		col_name[int(idx-1)] = C.GoString(c_name);
+		log.Println(col_name[int(idx-1)])
 	}
 	return col_name
 }
@@ -78,17 +81,63 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 	col_info = C.cci_get_result_info(rows.s.req, &stmt_type, &col_count)
 	var columnType C.T_CCI_U_TYPE
 	var i C.int
-	var value C.void
 	var ind C.int
-	for i = C.int(0); i < col_count; i++ {
+	for i = C.int(1); i <= col_count; i++ {
 		columnType = C.ex_cci_get_result_info_type(col_info, i)
 		switch columnType {
-		case C.CCI_U_TYPE_CHAR:
-			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_STR, unsafe.Pointer(&value), &ind)
-		case C.CCI_U_TYPE_INT:
-			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_INT, unsafe.Pointer(&value), &ind)
- 
+		case C.CCI_U_TYPE_CHAR, C.CCI_U_TYPE_STRING, C.CCI_U_TYPE_NCHAR, C.CCI_U_TYPE_VARNCHAR:
+			log.Println("cci_a_type_str")
+			var buf *C.char
+			err = C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_STR, unsafe.Pointer(&buf), &ind)
+			if int(err) < 0 {
+				log.Printf("get_data err : %d, %d\n", err, int(i))
+			}
+			//log.Printf("cci_a_type_str: %s", C.GoString(buf))
+			dest[int(i - 1)] = C.GoString(buf)
+		case C.CCI_U_TYPE_INT, C.CCI_U_TYPE_NUMERIC, C.CCI_U_TYPE_SHORT:
+			log.Println("cci_a_type_int")
+			var buf C.int
+			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_INT, unsafe.Pointer(&buf), &ind)
+			dest[int(i - 1)] = int(buf)
+ 		case C.CCI_U_TYPE_FLOAT:
+			log.Println("cci_a_type_float")
+			var buf C.float
+			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_FLOAT, unsafe.Pointer(&buf), &ind)
+			dest[int(i - 1)] = float64(buf)
+		case C.CCI_U_TYPE_DOUBLE:
+			log.Println("cci_a_type_double")
+			var buf C.double
+			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_DOUBLE, unsafe.Pointer(&buf), &ind)
+			dest[int(i - 1)] = float64(buf)
+		//case :
+		//	C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_BIT, unsafe.Pointer(&value), &ind)
+		case C.CCI_U_TYPE_DATE, C.CCI_U_TYPE_TIME, C.CCI_U_TYPE_TIMESTAMP:
+			log.Println("cci_a_type_date")
+			var buf C.T_CCI_DATE
+			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_DATE, unsafe.Pointer(&buf), &ind)
+			dest[int(i - 1)] = buf
+		case C.CCI_U_TYPE_SET, C.CCI_U_TYPE_MULTISET, C.CCI_U_TYPE_SEQUENCE, C.CCI_U_TYPE_OBJECT, C.CCI_U_TYPE_RESULTSET:
+			log.Println("cci_a_type_set")
+			var buf C.T_CCI_SET
+			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_SET, unsafe.Pointer(&buf), &ind)
+			dest[int(i - 1)] = buf
+		case C.CCI_U_TYPE_BIGINT:
+			log.Println("cci_a_type_bigint")
+			var buf C.int64_t
+			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_BIGINT, unsafe.Pointer(&buf), &ind)
+			dest[int(i - 1)] = int64(buf)
+		case C.CCI_U_TYPE_BLOB:
+			log.Println("cci_a_type_blob")
+			var buf C.T_CCI_BLOB
+			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_BLOB, unsafe.Pointer(&buf), &ind)
+			dest[int(i - 1)] = buf
+		case C.CCI_U_TYPE_CLOB:
+			log.Println("cci_u_type_clob")
+			var buf C.T_CCI_CLOB
+			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_CLOB, unsafe.Pointer(&buf), &ind)
+			dest[int(i - 1)] = buf
 		}
+		log.Printf("dest : %v\n", dest[int(i-1)])
 	}
 	return nil
 }
