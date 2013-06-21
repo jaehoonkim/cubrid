@@ -1,3 +1,6 @@
+/*
+CUBRID Database driver for Go
+*/
 package cubrid
 
 /*
