@@ -29,6 +29,9 @@ func (c *cubridConn) Prepare(query string) (driver.Stmt, error) {
 		return nil, fmt.Errorf("error : %d, %s", cci_error.err_code, cci_error.err_msg)
 	}
 	stmt.req = req
+	//var param_cnt C.int
+	//param_cnt = C.cci_get_bind_num(req)
+	//log.Printf("cubridConn:Prepare:param_cnt : %d\n", int(param_cnt))
 	return stmt, nil
 }
 
@@ -62,10 +65,30 @@ func (c *cubridConn) Begin() (driver.Tx, error) {
 
 func (c *cubridConn) Exec(query string, args []driver.Value) (driver.Result, error) {
 	log.Println("cubridConn:Exec")
-	return nil, nil
+	stmt, err := c.Prepare(query)
+	defer stmt.Close()
+	if err != nil {
+		return nil, err
+	}
+	result, err := stmt.Exec(args)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func (c *cubridConn) Query(query string, args []driver.Value) (driver.Rows, error) {
 	log.Println("cubridConn:Query")
-	return nil, nil
+	stmt, err := c.Prepare(query)
+	defer stmt.Close()
+	if err != nil {
+		return nil, err
+	}
+	rows, err := stmt.Query(args)
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	
+	return rows, nil
 }

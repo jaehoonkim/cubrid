@@ -17,7 +17,8 @@ func TestCubrid(t *testing.T) {
 	defer db.Close()
 }
 */
-func TestPrepare(t *testing.T) {
+
+func TestStmtQuery(t *testing.T) {
 	db, err := sql.Open("cubrid", "127.0.0.1/33000/demodb/dba/")
 	defer db.Close()
 	if err != nil {
@@ -31,17 +32,49 @@ func TestPrepare(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	log.Println("TestPrepare: test...0")
 	rows, err := stmt.Query()
 	defer rows.Close()
 	if err != nil {
 		log.Println(err)
 		t.Fatal(err)
 	}
-	log.Println("TestPrepare: test...1")
 	if rows.Next() == false {
+		t.Fatal(err)
+	}
+
+	var s_name, f_name string
+	rows.Scan(&s_name, &f_name)
+
+	fmt.Printf("s : %s, f : %s\n", s_name, f_name)
+}
+
+func TestStmtQueryParam(t *testing.T) {
+	db, err := sql.Open("cubrid", "127.0.0.1/33000/demodb/dba/")
+	defer db.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if db.Driver() == nil {
+		t.Fatal(err)
+	}
+	//log.Println("TestPrepare: test...0")
+	stmt, err := db.Prepare("select * from code where s_name = ?")
+	defer stmt.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	//log.Println("TestPrepare: test...1")
+	rows, err := stmt.Query("W")
+	defer rows.Close()
+	if err != nil {
+		//log.Println("stmt.Query err")
 		log.Println(err)
-		log.Println("=======================")
+		t.Fatal(err)
+	}
+	//log.Println("TestPrepare: test...2")
+	if rows.Next() == false {
+	//	log.Println(err)
+	//	log.Println("=======================")
 		t.Fatal(err)
 	}
 
