@@ -7,8 +7,9 @@ import "C"
 import (
 	"database/sql/driver"
 	"fmt"
-	//"log"
+	"log"
 	"unsafe"
+	"time"
 )
 
 type cubridStmt struct {
@@ -82,11 +83,28 @@ func (s *cubridStmt) bindParam(args []driver.Value) error {
 	for i, arg := range args {
 		//var c_arg *C.char
 		//c_arg = C.CString(arg)
-		ss = fmt.Sprint(arg)
-		//log.Printf("cubridStmt:bindParam:%s\n", ss)
-		err = C.cci_bind_param(s.req, C.int(i+1), C.CCI_A_TYPE_STR, unsafe.Pointer(C.CString(ss)), C.CCI_U_TYPE_STRING, C.CCI_BIND_PTR)
-		if err < 0 {
-			return fmt.Errorf("cci_bind_param : %d", err)
+		switch arg.(type) {
+		case int64:
+			c_param := C.int(arg.(int64))
+			err = C.cci_bind_param(s.req, C.int(i + 1), C.CCI_A_TYPE_INT, unsafe.Pointer(&c_param), C.CCI_U_TYPE_INT, C.CCI_BIND_PTR)
+			if int(err) < 0 {
+				return fmt.Errorf("cci_bind_param : %d", int(err))
+			}
+		case string:
+			ss = fmt.Sprint(arg)
+			//log.Printf("cubridStmt:bindParam:%s\n", ss)
+			err = C.cci_bind_param(s.req, C.int(i+1), C.CCI_A_TYPE_STR, unsafe.Pointer(C.CString(ss)), C.CCI_U_TYPE_STRING, C.CCI_BIND_PTR)
+			if err < 0 {
+				return fmt.Errorf("cci_bind_param : %d", err)
+			}
+		case time.Time:
+			log.Println("statement:bindParam:time.Tile")
+		case float64:
+			log.Println("statement:bindParam:float64")
+		case bool:
+			log.Println("statement:bindParam:bool")
+		case []byte:
+			log.Println("statement:bindParam:[]byte")
 		}
 		//log.Printf("cubridStmt:bindParam:idx : %d, arg:%s", i, arg.(string))
 	}
