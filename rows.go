@@ -109,8 +109,12 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 			var buf C.double
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_DOUBLE, unsafe.Pointer(&buf), &ind)
 			dest[int(i - 1)] = float64(buf)
-		//case :
-		//	C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_BIT, unsafe.Pointer(&value), &ind)
+		case C.CCI_U_TYPE_BIT:
+			//log.Println("cci_a_type_bit")
+			var buf C.T_CCI_BIT
+			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_BIT, unsafe.Pointer(&buf), &ind)
+			_bit := CCI_BIT{ buf }
+			dest[int(i - 1)] = _bit
 		case C.CCI_U_TYPE_DATE, C.CCI_U_TYPE_TIME, C.CCI_U_TYPE_TIMESTAMP:
 			log.Println("cci_a_type_date")
 			var buf C.T_CCI_DATE
@@ -118,12 +122,13 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 
 			_date := CCI_DATE{ buf }
 			dest[int(i - 1)] = _date
-			log.Printf("cci_a_type_date:%d,%d,%d", int(_date._DATE.yr), _date._DATE.mon, _date._DATE.day)
+			//log.Printf("cci_a_type_date:%d,%d,%d", int(_date._DATE.yr), _date._DATE.mon, _date._DATE.day)
 		case C.CCI_U_TYPE_SET, C.CCI_U_TYPE_MULTISET, C.CCI_U_TYPE_SEQUENCE, C.CCI_U_TYPE_OBJECT, C.CCI_U_TYPE_RESULTSET:
 			//log.Println("cci_a_type_set")
 			var buf C.T_CCI_SET
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_SET, unsafe.Pointer(&buf), &ind)
-			dest[int(i - 1)] = buf
+			_set := CCI_SET { buf }
+			dest[int(i - 1)] = _set
 		case C.CCI_U_TYPE_BIGINT:
 			//log.Println("cci_a_type_bigint")
 			var buf C.int64_t
@@ -133,12 +138,14 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 			//log.Println("cci_a_type_blob")
 			var buf C.T_CCI_BLOB
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_BLOB, unsafe.Pointer(&buf), &ind)
-			dest[int(i - 1)] = buf
+			_blob := CCI_BLOB { buf }
+			dest[int(i - 1)] = _blob
 		case C.CCI_U_TYPE_CLOB:
 			//log.Println("cci_u_type_clob")
 			var buf C.T_CCI_CLOB
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_CLOB, unsafe.Pointer(&buf), &ind)
-			dest[int(i - 1)] = buf
+			_clob := CCI_CLOB { buf }
+			dest[int(i - 1)] = _clob
 		}
 		//log.Printf("dest : %v\n", dest[int(i-1)])
 	}

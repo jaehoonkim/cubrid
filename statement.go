@@ -81,8 +81,6 @@ func (s *cubridStmt) bindParam(args []driver.Value) error {
 	var ss string
 	var err C.int
 	for i, arg := range args {
-		//var c_arg *C.char
-		//c_arg = C.CString(arg)
 		switch arg.(type) {
 		case int64:
 			c_param := C.int(arg.(int64))
@@ -101,8 +99,14 @@ func (s *cubridStmt) bindParam(args []driver.Value) error {
 			log.Println("statement:bindParam:time.Tile")
 		case float64:
 			log.Println("statement:bindParam:float64")
+			c_param := C.float(arg.(float64))
+			err = C.cci_bind_param(s.req, C.int(i + 1), C.CCI_A_TYPE_FLOAT, unsafe.Pointer(&c_param), C.CCI_U_TYPE_FLOAT, C.CCI_BIND_PTR)
+			if int(err) < 0 {
+				return fmt.Errorf("cci_bind_param : %d", int(err))
+			}
 		case bool:
 			log.Println("statement:bindParam:bool")
+			return fmt.Errorf("not supported type")
 		case []byte:
 			log.Println("statement:bindParam:[]byte")
 		}

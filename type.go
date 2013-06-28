@@ -5,10 +5,41 @@ package cubrid
 */
 import "C"
 
+import "unsafe"
+
 type CCI_DATE struct {
 	_DATE C.T_CCI_DATE
 }
 
+/*
+ cubrid manual
+ - 비트열은 0과 1로 이루어진 이진 값의 순열(sequence) 이다.
+ - 2진수 형식으로 사용할 때에는 다음과 같이 문자 B뒤에 0과 1로 이루어진 문자열을 붙이거나, 
+   0b 뒤에 값을 붙여 표현한다.
+   ex) B'1010'
+       0b1010
+ - 16진수 형식은 대문자 X 뒤에 0-9 그리고 A-F 문자로 이루어진 문자열을 붙이거나
+   0x 뒤에 값을 붙여 표현한다.
+   ex) X'a'
+       0xA
+*/
+type CCI_BIT struct {
+	_BIT C.T_CCI_BIT
+}
+
+type CCI_SET struct {
+	_SET C.T_CCI_SET
+}
+
+type CCI_BLOB struct {
+	_BLOB C.T_CCI_BLOB
+}
+
+type CCI_CLOB struct {
+	_CLOB C.T_CCI_CLOB
+}
+
+/*-----------------------------------------------*/
 func (date *CCI_DATE) yr() uint {
 	return uint(date._DATE.yr)
 }
@@ -35,5 +66,25 @@ func (date *CCI_DATE) ss() uint {
 
 func (date *CCI_DATE) ms() uint {
 	return uint(date._DATE.ms)
+}
+
+/**************************************/
+func (bit *CCI_BIT) buf() unsafe.Pointer {
+	return unsafe.Pointer(bit._BIT.buf)
+}
+
+/**************************************/
+func (set *CCI_SET) buf() unsafe.Pointer {
+	return unsafe.Pointer(set._SET)
+}
+
+/*************************************/
+func (blob *CCI_BLOB) buf() unsafe.Pointer {
+	return unsafe.Pointer(blob._BLOB)
+}
+
+/*************************************/
+func (clob *CCI_CLOB) buf() string {
+	return C.GoString((*C.char)(clob._CLOB))
 }
 
