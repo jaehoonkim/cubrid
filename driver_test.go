@@ -5,6 +5,7 @@ import (
 	"testing"
 	"fmt"
 	"log"
+	//"unsafe"
 )
 /*
 func TestCubrid(t *testing.T) {
@@ -126,6 +127,7 @@ func TestStmtQueryBind_int(t *testing.T) {
 	fmt.Printf("code:%d, name:%s, gender:%s, nation_code:%s, event:%s\n", code, name, gender, nation_code, event)
 }
 */
+/*
 func TestStmtQueryBind_date(t *testing.T) {
 	db, err := sql.Open("cubrid", "127.0.0.1/33000/demodb/dba/")
 	defer db.Close()
@@ -161,5 +163,44 @@ func TestStmtQueryBind_date(t *testing.T) {
 	rows.Scan(&host_year, &event_code, &athlete_code, &stadium_code, &nation_code, &medal, &game_date)
 	
 	fmt.Printf("host_year:%s, event_code:%s, athlete_code:%s, stadium_code:%s, nation_code:%s, medal:%s, game_date:%d,%d,%d\n", host_year, event_code, athlete_code, stadium_code, nation_code, medal, game_date.yr(), game_date.mon(), game_date.day())
+}
+*/
+
+func TestStmtQueryBind_date(t *testing.T) {
+	db, err := sql.Open("cubrid", "127.0.0.1/33000/testdb/dba/1234")
+	defer db.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if db.Driver() == nil {
+		t.Fatal(err)
+	}
+	//log.Println("TestPrepare: test...0")
+	stmt, err := db.Prepare("select * from tbl_bit")
+	defer stmt.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	//log.Println("TestPrepare: test...1")
+	rows, err := stmt.Query()
+	defer rows.Close()
+	if err != nil {
+		//log.Println("stmt.Query err")
+		log.Println(err)
+		t.Fatal(err)
+	}
+	//log.Println("TestPrepare: test...2")
+	if rows.Next() == false {
+	//	log.Println(err)
+	//	log.Println("=======================")
+		t.Fatal(err)
+	}
+
+	var buf CCI_BIT
+	var idx int
+
+	rows.Scan(&idx,&buf)
+	
+	fmt.Printf("idx : %d, size:%d, buf: %v\n", idx, buf.size(), buf.buf())
 }
 

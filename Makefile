@@ -17,3 +17,4 @@ install :
 	$(G) install
 clean :
 	$(G) clean
+	rm -rf CUBRID

@@ -69,6 +69,10 @@ func (date *CCI_DATE) ms() uint {
 }
 
 /**************************************/
+func (bit *CCI_BIT) size() int {
+	return int(bit._BIT.size)
+}
+
 func (bit *CCI_BIT) buf() unsafe.Pointer {
 	return unsafe.Pointer(bit._BIT.buf)
 }
