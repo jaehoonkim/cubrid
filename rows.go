@@ -84,6 +84,7 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 	var ind C.int
 	for i = C.int(1); i <= col_count; i++ {
 		columnType = C.ex_cci_get_result_info_type(col_info, i)
+		log.Printf("columnType : %d", columnType)
 		switch columnType {
 		case C.CCI_U_TYPE_CHAR, C.CCI_U_TYPE_STRING, C.CCI_U_TYPE_NCHAR, C.CCI_U_TYPE_VARNCHAR:
 			//log.Println("cci_a_type_str")
@@ -109,11 +110,12 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 			var buf C.double
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_DOUBLE, unsafe.Pointer(&buf), &ind)
 			dest[int(i - 1)] = float64(buf)
-		case C.CCI_U_TYPE_BIT:
-			//log.Println("cci_a_type_bit")
+		case C.CCI_U_TYPE_BIT, C.CCI_U_TYPE_VARBIT:
+			log.Println("cci_a_type_bit")
 			var buf C.T_CCI_BIT
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_BIT, unsafe.Pointer(&buf), &ind)
 			_bit := CCI_BIT{ buf }
+			//log.Printf("cci_bit : %x, %d", C.GoString(buf.buf), int(buf.size))
 			dest[int(i - 1)] = _bit
 		case C.CCI_U_TYPE_DATE, C.CCI_U_TYPE_TIME, C.CCI_U_TYPE_TIMESTAMP:
 			log.Println("cci_a_type_date")

@@ -6,6 +6,7 @@ package cubrid
 import "C"
 
 import "unsafe"
+import "fmt"
 
 type CCI_DATE struct {
 	_DATE C.T_CCI_DATE
@@ -73,8 +74,15 @@ func (bit *CCI_BIT) size() int {
 	return int(bit._BIT.size)
 }
 
-func (bit *CCI_BIT) buf() unsafe.Pointer {
-	return unsafe.Pointer(bit._BIT.buf)
+func (bit *CCI_BIT) buf() string {
+	//hexBuf, _ := hex.DecodeString(C.GoString(bit._BIT.buf))
+	//if err != nil {
+	//	return nil
+	//}
+	strBuf := fmt.Sprintf("X'%x'", C.GoStringN(bit._BIT.buf, bit._BIT.size))
+	return strBuf
+	//return C.GoStringN(bit._BIT.buf, bit._BIT.size)
+	//return hexBuf
 }
 
 /**************************************/

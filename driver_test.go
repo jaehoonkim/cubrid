@@ -1,5 +1,6 @@
 package cubrid
 
+
 import (
 	"database/sql"
 	"testing"
@@ -166,7 +167,13 @@ func TestStmtQueryBind_date(t *testing.T) {
 }
 */
 
-func TestStmtQueryBind_date(t *testing.T) {
+/*
+	table name : tbl_bitn
+	column
+	idx : integer
+	bitn : BIT_VARYING
+*/
+func TestStmtQueryBind_bit(t *testing.T) {
 	db, err := sql.Open("cubrid", "127.0.0.1/33000/testdb/dba/1234")
 	defer db.Close()
 	if err != nil {
@@ -176,7 +183,9 @@ func TestStmtQueryBind_date(t *testing.T) {
 		t.Fatal(err)
 	}
 	//log.Println("TestPrepare: test...0")
-	stmt, err := db.Prepare("select * from tbl_bit")
+	//stmt, err := db.Prepare("select * from tbl_bit")
+	stmt, err := db.Prepare("select * from tbl_bitn")
+
 	defer stmt.Close()
 	if err != nil {
 		t.Fatal(err)
@@ -200,7 +209,14 @@ func TestStmtQueryBind_date(t *testing.T) {
 	var idx int
 
 	rows.Scan(&idx,&buf)
-	
-	fmt.Printf("idx : %d, size:%d, buf: %v\n", idx, buf.size(), buf.buf())
+	fmt.Printf("idx : %d, size:%d, buf: %s\n", idx, buf.size(), buf.buf())
+
+	//if rows.Next() == false {
+	//	t.Fatal(err)
+	//}
+
+	//rows.Scan(&idx,&buf)
+	//fmt.Printf("idx : %d, size:%d, buf: %x\n", idx, buf.size(), buf.buf())
+
 }
 
