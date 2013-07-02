@@ -13,6 +13,14 @@ T_CCI_U_TYPE ex_cci_get_result_info_type(T_CCI_COL_INFO* res_info, int index) {
 	return CCI_GET_RESULT_INFO_TYPE(res_info, index);
 //	return res_info[index - 1].type;
 }
+
+int ex_cci_is_set_type(T_CCI_U_TYPE type) {
+	return CCI_IS_SET_TYPE(type);
+}
+
+int ex_cci_is_collection_type(T_CCI_U_TYPE type) {
+	return CCI_IS_COLLECTION_TYPE(type);
+}
 */
 import "C"
 import (
@@ -84,10 +92,10 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 	var ind C.int
 	for i = C.int(1); i <= col_count; i++ {
 		columnType = C.ex_cci_get_result_info_type(col_info, i)
-		log.Printf("columnType : %d", columnType)
+		log.Printf("columnType : %d", int(columnType))
 		switch columnType {
 		case C.CCI_U_TYPE_CHAR, C.CCI_U_TYPE_STRING, C.CCI_U_TYPE_NCHAR, C.CCI_U_TYPE_VARNCHAR:
-			//log.Println("cci_a_type_str")
+			log.Println("cci_a_type_str")
 			var buf *C.char
 			err = C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_STR, unsafe.Pointer(&buf), &ind)
 			if int(err) < 0 {
@@ -96,17 +104,17 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 			//log.Printf("cci_a_type_str: %s", C.GoString(buf))
 			dest[int(i - 1)] = C.GoString(buf)
 		case C.CCI_U_TYPE_INT, C.CCI_U_TYPE_NUMERIC, C.CCI_U_TYPE_SHORT:
-			//log.Println("cci_a_type_int")
+			log.Println("cci_a_type_int")
 			var buf C.int
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_INT, unsafe.Pointer(&buf), &ind)
 			dest[int(i - 1)] = int(buf)
  		case C.CCI_U_TYPE_FLOAT:
-			//log.Println("cci_a_type_float")
+			log.Println("cci_a_type_float")
 			var buf C.float
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_FLOAT, unsafe.Pointer(&buf), &ind)
 			dest[int(i - 1)] = float64(buf)
 		case C.CCI_U_TYPE_DOUBLE:
-			//log.Println("cci_a_type_double")
+			log.Println("cci_a_type_double")
 			var buf C.double
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_DOUBLE, unsafe.Pointer(&buf), &ind)
 			dest[int(i - 1)] = float64(buf)
@@ -125,29 +133,47 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 			_date := CCI_DATE{ buf }
 			dest[int(i - 1)] = _date
 			//log.Printf("cci_a_type_date:%d,%d,%d", int(_date._DATE.yr), _date._DATE.mon, _date._DATE.day)
-		case C.CCI_U_TYPE_SET, C.CCI_U_TYPE_MULTISET, C.CCI_U_TYPE_SEQUENCE, C.CCI_U_TYPE_OBJECT, C.CCI_U_TYPE_RESULTSET:
-			//log.Println("cci_a_type_set")
-			var buf C.T_CCI_SET
-			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_SET, unsafe.Pointer(&buf), &ind)
-			_set := CCI_SET { buf }
-			dest[int(i - 1)] = _set
+		case /*C.CCI_U_TYPE_SET, C.CCI_U_TYPE_MULTISET, C.CCI_U_TYPE_SEQUENCE,*/ C.CCI_U_TYPE_OBJECT, C.CCI_U_TYPE_RESULTSET:
+			log.Println("cci_a_type_set")
+			//var buf C.T_CCI_SET
+			//C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_SET, unsafe.Pointer(&buf), &ind)
+			//_set := CCI_SET { buf }
+			//dest[int(i - 1)] = _set
 		case C.CCI_U_TYPE_BIGINT:
-			//log.Println("cci_a_type_bigint")
+			log.Println("cci_a_type_bigint")
 			var buf C.int64_t
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_BIGINT, unsafe.Pointer(&buf), &ind)
 			dest[int(i - 1)] = int64(buf)
 		case C.CCI_U_TYPE_BLOB:
-			//log.Println("cci_a_type_blob")
+			log.Println("cci_a_type_blob")
 			var buf C.T_CCI_BLOB
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_BLOB, unsafe.Pointer(&buf), &ind)
 			_blob := CCI_BLOB { buf }
 			dest[int(i - 1)] = _blob
 		case C.CCI_U_TYPE_CLOB:
-			//log.Println("cci_u_type_clob")
+			log.Println("cci_u_type_clob")
 			var buf C.T_CCI_CLOB
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_CLOB, unsafe.Pointer(&buf), &ind)
 			_clob := CCI_CLOB { buf }
 			dest[int(i - 1)] = _clob
+		/*default:
+			if int(C.ex_cci_is_collection_type(columnType)) == 1 {
+				log.Println("ex_cci_is_set_type")
+				var set C.T_CCI_SET
+				C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_SET, unsafe.Pointer(&set), &ind)
+				var set_size C.int
+				set_size = C.cci_set_size(set)
+				for j := 0; j < set_size; j++ {
+					res := C.cci_set_get(set, j+1, CCI_A_TYPE_STR, &buf, &ind)
+					if res < 0 {
+						C.cci_set_free(set)
+						return nil
+					}
+				}
+				_set := CCI_SET { size:set_size, _SET:set }
+				dest[int(i - 1)] = _set
+			}
+		//*/
 		}
 		//log.Printf("dest : %v\n", dest[int(i-1)])
 	}

@@ -6,7 +6,7 @@ package cubrid
 import "C"
 
 import "unsafe"
-import "fmt"
+//import "fmt"
 
 type CCI_DATE struct {
 	_DATE C.T_CCI_DATE
@@ -29,6 +29,7 @@ type CCI_BIT struct {
 }
 
 type CCI_SET struct {
+	size C.int
 	_SET C.T_CCI_SET
 }
 
@@ -79,14 +80,16 @@ func (bit *CCI_BIT) buf() string {
 	//if err != nil {
 	//	return nil
 	//}
-	strBuf := fmt.Sprintf("X'%x'", C.GoStringN(bit._BIT.buf, bit._BIT.size))
-	return strBuf
+	//strBuf := fmt.Sprintf("X'%x'", C.GoStringN(bit._BIT.buf, bit._BIT.size))
+	return C.GoStringN(bit._BIT.buf, bit._BIT.size)
 	//return C.GoStringN(bit._BIT.buf, bit._BIT.size)
 	//return hexBuf
 }
 
 /**************************************/
 func (set *CCI_SET) buf() unsafe.Pointer {
+	// int cci_set_size(T_CCI_SET set) // T_CCI_SET 타입 값에 대한 엘리먼트 개수를 가져온다.
+	
 	return unsafe.Pointer(set._SET)
 }
 

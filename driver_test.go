@@ -6,8 +6,15 @@ import (
 	"testing"
 	"fmt"
 	"log"
-	//"unsafe"
 )
+
+func openDb(t *testing.T, dsn string) *sql.DB {
+	db, err := sql.Open("cubrid", dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return db
+}
 /*
 func TestCubrid(t *testing.T) {
 	fmt.Println("TestCubrid")
@@ -173,14 +180,12 @@ func TestStmtQueryBind_date(t *testing.T) {
 	idx : integer
 	bitn : BIT_VARYING
 */
+/*
 func TestStmtQueryBind_bit(t *testing.T) {
-	db, err := sql.Open("cubrid", "127.0.0.1/33000/testdb/dba/1234")
+	db := openDb(t, "127.0.0.1/33000/testdb/dba/1234")
 	defer db.Close()
-	if err != nil {
-		t.Fatal(err)
-	}
 	if db.Driver() == nil {
-		t.Fatal(err)
+		t.Fatal(fmt.Errorf("nil driver"))
 	}
 	//log.Println("TestPrepare: test...0")
 	//stmt, err := db.Prepare("select * from tbl_bit")
@@ -190,18 +195,13 @@ func TestStmtQueryBind_bit(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	//log.Println("TestPrepare: test...1")
 	rows, err := stmt.Query()
 	defer rows.Close()
 	if err != nil {
-		//log.Println("stmt.Query err")
 		log.Println(err)
 		t.Fatal(err)
 	}
-	//log.Println("TestPrepare: test...2")
 	if rows.Next() == false {
-	//	log.Println(err)
-	//	log.Println("=======================")
 		t.Fatal(err)
 	}
 
@@ -210,13 +210,40 @@ func TestStmtQueryBind_bit(t *testing.T) {
 
 	rows.Scan(&idx,&buf)
 	fmt.Printf("idx : %d, size:%d, buf: %s\n", idx, buf.size(), buf.buf())
+}
+*/
+/*
+	table name : tbl_set
+	column
+	idx : integer
+	setn : SET
+*/
+func TestStmtQueryBind_set(t *testing.T) {
+	db := openDb(t, "127.0.0.1/33000/testdb/dba/1234")
+	defer db.Close()
+	if db.Driver() == nil {
+		t.Fatal(fmt.Errorf("nil driver"))
+	}
+	stmt, err := db.Prepare("select * from tbl_set")
 
-	//if rows.Next() == false {
-	//	t.Fatal(err)
-	//}
+	defer stmt.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows, err := stmt.Query()
+	defer rows.Close()
+	if err != nil {
+		log.Println(err)
+		t.Fatal(err)
+	}
+	if rows.Next() == false {
+		t.Fatal(err)
+	}
 
-	//rows.Scan(&idx,&buf)
-	//fmt.Printf("idx : %d, size:%d, buf: %x\n", idx, buf.size(), buf.buf())
+	//var buf CCI_SET
+	var idx int
 
+	rows.Scan(&idx)
+	fmt.Printf("idx : %d\n", idx)
 }
 
