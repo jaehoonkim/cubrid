@@ -156,26 +156,28 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_CLOB, unsafe.Pointer(&buf), &ind)
 			_clob := CCI_CLOB { buf }
 			dest[int(i - 1)] = _clob
-		/*default:
+		default:
 			if int(C.ex_cci_is_collection_type(columnType)) == 1 {
 				log.Println("ex_cci_is_set_type")
 				var set C.T_CCI_SET
 				C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_SET, unsafe.Pointer(&set), &ind)
 				var set_size C.int
+				var buf *C.char
 				set_size = C.cci_set_size(set)
-				for j := 0; j < set_size; j++ {
-					res := C.cci_set_get(set, j+1, CCI_A_TYPE_STR, &buf, &ind)
+				var _set CCI_SET
+				_set.makeBuf(int(set_size))
+				for j := C.int(0); j < set_size; j++ {
+					res := C.cci_set_get(set, j+1, C.CCI_A_TYPE_STR, unsafe.Pointer(&buf), &ind)
 					if res < 0 {
 						C.cci_set_free(set)
 						return nil
 					}
+					_set.setBuf(int(j), C.GoString(buf))
 				}
-				_set := CCI_SET { size:set_size, _SET:set }
 				dest[int(i - 1)] = _set
+				C.cci_set_free(set)
 			}
-		//*/
 		}
-		//log.Printf("dest : %v\n", dest[int(i-1)])
 	}
 	return nil
 }

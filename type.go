@@ -29,8 +29,9 @@ type CCI_BIT struct {
 }
 
 type CCI_SET struct {
-	size C.int
-	_SET C.T_CCI_SET
+	//size C.int
+	size int
+	buf []string
 }
 
 type CCI_BLOB struct {
@@ -76,21 +77,21 @@ func (bit *CCI_BIT) size() int {
 }
 
 func (bit *CCI_BIT) buf() string {
-	//hexBuf, _ := hex.DecodeString(C.GoString(bit._BIT.buf))
-	//if err != nil {
-	//	return nil
-	//}
-	//strBuf := fmt.Sprintf("X'%x'", C.GoStringN(bit._BIT.buf, bit._BIT.size))
 	return C.GoStringN(bit._BIT.buf, bit._BIT.size)
-	//return C.GoStringN(bit._BIT.buf, bit._BIT.size)
-	//return hexBuf
 }
 
 /**************************************/
-func (set *CCI_SET) buf() unsafe.Pointer {
-	// int cci_set_size(T_CCI_SET set) // T_CCI_SET 타입 값에 대한 엘리먼트 개수를 가져온다.
-	
-	return unsafe.Pointer(set._SET)
+func (set *CCI_SET) Buf(idx int) string {
+	return set.buf[idx]
+}
+
+func (set *CCI_SET) makeBuf(size int) {
+	set.size = size
+	set.buf = make([]string, size)
+}
+
+func (set *CCI_SET) setBuf(idx int, buf string) {
+	set.buf[idx] = buf
 }
 
 /*************************************/
