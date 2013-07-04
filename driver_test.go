@@ -244,7 +244,9 @@ func TestStmtQueryBind_set(t *testing.T) {
 	var idx int
 	var set CCI_SET
 	rows.Scan(&idx, &set)
-	fmt.Printf("idx : %d, %s, %s, %s\n", idx, set.Buf(0), set.Buf(1), set.Buf(2))
+	if set.Size() > 0 {
+		fmt.Printf("idx : %d, %s, %s, %s\n", idx, set.Buf(0), set.Buf(1), set.Buf(2))
+	}
 
 	rows.Next()
 	rows.Scan(&idx, &set)

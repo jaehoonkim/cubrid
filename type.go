@@ -85,6 +85,10 @@ func (set *CCI_SET) Buf(idx int) string {
 	return set.buf[idx]
 }
 
+func (set *CCI_SET) Size() int {
+	return set.size
+}
+
 func (set *CCI_SET) makeBuf(size int) {
 	set.size = size
 	set.buf = make([]string, size)

@@ -161,9 +161,16 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 				log.Println("ex_cci_is_set_type")
 				var set C.T_CCI_SET
 				C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_SET, unsafe.Pointer(&set), &ind)
+				if(int(ind) == -1) {
+					log.Println("set data is nil")
+					return nil
+				}
 				var set_size C.int
 				var buf *C.char
+				log.Println("1rorororororo")
 				set_size = C.cci_set_size(set)
+				log.Println("2rorororororo")
+
 				var _set CCI_SET
 				_set.makeBuf(int(set_size))
 				for j := C.int(0); j < set_size; j++ {
