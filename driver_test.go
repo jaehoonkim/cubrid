@@ -1,6 +1,5 @@
 package cubrid
 
-
 import (
 	"database/sql"
 	"testing"
@@ -218,6 +217,7 @@ func TestStmtQueryBind_bit(t *testing.T) {
 	idx : integer
 	setn : SET
 */
+/*
 func TestStmtQueryBind_set(t *testing.T) {
 	db := openDb(t, "127.0.0.1/33000/testdb/dba/1234")
 	defer db.Close()
@@ -252,5 +252,33 @@ func TestStmtQueryBind_set(t *testing.T) {
 	rows.Scan(&idx, &set)
 	fmt.Printf("idx : %d, %s, %s, %s\n", idx, set.Buf(0), set.Buf(1), set.Buf(2))
 
+}
+*/
+func TestStmtQueryBind_clob(t *testing.T) {
+	db := openDb(t, "127.0.0.1/33000/testdb/dba/1234")
+	defer db.Close()
+	if db.Driver() == nil {
+		t.Fatal(fmt.Errorf("nil driver"))
+	}
+	stmt, err := db.Prepare("select * from tbl_clob")
+
+	defer stmt.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows, err := stmt.Query()
+	defer rows.Close()
+	if err != nil {
+		log.Println(err)
+		t.Fatal(err)
+	}
+	if rows.Next() == false {
+		t.Fatal(err)
+	}
+
+	var idx int
+	var clob CCI_CLOB
+	rows.Scan(&idx, &clob)
+	fmt.Printf("idx : %d, %s\n", idx, clob.Buf())
 }
 

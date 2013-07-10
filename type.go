@@ -6,7 +6,7 @@ package cubrid
 import "C"
 
 import "unsafe"
-//import "fmt"
+//import "log"
 
 type CCI_DATE struct {
 	_DATE C.T_CCI_DATE
@@ -39,7 +39,7 @@ type CCI_BLOB struct {
 }
 
 type CCI_CLOB struct {
-	_CLOB C.T_CCI_CLOB
+	_CLOB string
 }
 
 /*-----------------------------------------------*/
@@ -104,7 +104,12 @@ func (blob *CCI_BLOB) buf() unsafe.Pointer {
 }
 
 /*************************************/
-func (clob *CCI_CLOB) buf() string {
-	return C.GoString((*C.char)(clob._CLOB))
+func (clob *CCI_CLOB) Buf() string {
+	//log.Printf("type:%s", clob._CLOB)
+	return clob._CLOB
 }
-
+/*
+func (clob *CCI_CLOB) getBytes() []byte {
+	return ([]byte)(unsafe.Pointer(clob._CLOB))
+}
+*/

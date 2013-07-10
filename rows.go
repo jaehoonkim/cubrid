@@ -101,7 +101,6 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 			if int(err) < 0 {
 				return fmt.Errorf("get_data err : %d, %d\n", err, int(i))
 			}
-			//log.Printf("cci_a_type_str: %s", C.GoString(buf))
 			dest[int(i - 1)] = C.GoString(buf)
 		case C.CCI_U_TYPE_INT, C.CCI_U_TYPE_NUMERIC, C.CCI_U_TYPE_SHORT:
 			log.Println("cci_a_type_int")
@@ -123,7 +122,6 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 			var buf C.T_CCI_BIT
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_BIT, unsafe.Pointer(&buf), &ind)
 			_bit := CCI_BIT{ buf }
-			//log.Printf("cci_bit : %x, %d", C.GoString(buf.buf), int(buf.size))
 			dest[int(i - 1)] = _bit
 		case C.CCI_U_TYPE_DATE, C.CCI_U_TYPE_TIME, C.CCI_U_TYPE_TIMESTAMP:
 			log.Println("cci_a_type_date")
@@ -132,7 +130,6 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 
 			_date := CCI_DATE{ buf }
 			dest[int(i - 1)] = _date
-			//log.Printf("cci_a_type_date:%d,%d,%d", int(_date._DATE.yr), _date._DATE.mon, _date._DATE.day)
 		case /*C.CCI_U_TYPE_SET, C.CCI_U_TYPE_MULTISET, C.CCI_U_TYPE_SEQUENCE,*/ C.CCI_U_TYPE_OBJECT, C.CCI_U_TYPE_RESULTSET:
 			log.Println("cci_a_type_set")
 			//var buf C.T_CCI_SET
@@ -152,9 +149,16 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 			dest[int(i - 1)] = _blob
 		case C.CCI_U_TYPE_CLOB:
 			log.Println("cci_u_type_clob")
-			var buf C.T_CCI_CLOB
-			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_CLOB, unsafe.Pointer(&buf), &ind)
-			_clob := CCI_CLOB { buf }
+			var clob C.T_CCI_CLOB
+			var size C.longlong
+			var buf string
+			cBuf := C.CString(buf)
+			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_CLOB, unsafe.Pointer(&clob), &ind)
+			size = C.cci_clob_size(clob)
+			C.cci_clob_read(rows.s.c.con, clob, 0, C.int(size), cBuf, &cci_error)
+			_clob := CCI_CLOB { _CLOB : C.GoString(cBuf) }
+			C.free(unsafe.Pointer(cBuf))
+			C.cci_clob_free(clob)
 			dest[int(i - 1)] = _clob
 		default:
 			if int(C.ex_cci_is_collection_type(columnType)) == 1 {
@@ -167,9 +171,7 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 				}
 				var set_size C.int
 				var buf *C.char
-				log.Println("1rorororororo")
 				set_size = C.cci_set_size(set)
-				log.Println("2rorororororo")
 
 				var _set CCI_SET
 				_set.makeBuf(int(set_size))
