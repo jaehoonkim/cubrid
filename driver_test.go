@@ -58,7 +58,6 @@ func TestStmtQuery(t *testing.T) {
 	}
 }
 */
-
 /*
 func TestStmtQueryParam(t *testing.T) {
 	db, err := sql.Open("cubrid", "127.0.0.1/33000/demodb/dba/")
@@ -133,7 +132,7 @@ func TestStmtQueryBind_int(t *testing.T) {
 
 	fmt.Printf("code:%d, name:%s, gender:%s, nation_code:%s, event:%s\n", code, name, gender, nation_code, event)
 }
-*/
+//*/
 /*
 func TestStmtQueryBind_date(t *testing.T) {
 	db, err := sql.Open("cubrid", "127.0.0.1/33000/demodb/dba/")
@@ -169,9 +168,10 @@ func TestStmtQueryBind_date(t *testing.T) {
 	var host_year, event_code, athlete_code, stadium_code, nation_code, medal string
 	rows.Scan(&host_year, &event_code, &athlete_code, &stadium_code, &nation_code, &medal, &game_date)
 	
-	fmt.Printf("host_year:%s, event_code:%s, athlete_code:%s, stadium_code:%s, nation_code:%s, medal:%s, game_date:%d,%d,%d\n", host_year, event_code, athlete_code, stadium_code, nation_code, medal, game_date.yr(), game_date.mon(), game_date.day())
+	fmt.Printf("host_year:%s, event_code:%s, athlete_code:%s, stadium_code:%s, nation_code:%s, medal:%s, game_date:%d,%d,%d\n", host_year, event_code, athlete_code, stadium_code, nation_code, medal, game_date.Yr(), game_date.Mon(), game_date.Day())
 }
-*/
+//*/
+
 
 /*
 	table name : tbl_bitn
@@ -208,9 +208,9 @@ func TestStmtQueryBind_bit(t *testing.T) {
 	var idx int
 
 	rows.Scan(&idx,&buf)
-	fmt.Printf("idx : %d, size:%d, buf: %s\n", idx, buf.size(), buf.buf())
+	fmt.Printf("idx : %d, size:%d, buf: %s\n", idx, buf.Size(), buf.Buf())
 }
-*/
+//*/
 /*
 	table name : tbl_set
 	column
@@ -253,7 +253,8 @@ func TestStmtQueryBind_set(t *testing.T) {
 	fmt.Printf("idx : %d, %s, %s, %s\n", idx, set.Buf(0), set.Buf(1), set.Buf(2))
 
 }
-*/
+//*/
+/*
 func TestStmtQueryBind_clob(t *testing.T) {
 	db := openDb(t, "127.0.0.1/33000/testdb/dba/1234")
 	defer db.Close()
@@ -280,5 +281,34 @@ func TestStmtQueryBind_clob(t *testing.T) {
 	var clob CCI_CLOB
 	rows.Scan(&idx, &clob)
 	fmt.Printf("idx : %d, %s\n", idx, clob.Buf())
+}
+//*/
+
+func TestStmtQueryBind_blob(t *testing.T) {
+	db := openDb(t, "127.0.0.1/33000/testdb/dba/1234")
+	defer db.Close()
+	if db.Driver() == nil {
+		t.Fatal(fmt.Errorf("nil driver"))
+	}
+	stmt, err := db.Prepare("select * from tbl_blob")
+
+	defer stmt.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows, err := stmt.Query()
+	defer rows.Close()
+	if err != nil {
+		log.Println(err)
+		t.Fatal(err)
+	}
+	if rows.Next() == false {
+		t.Fatal(err)
+	}
+
+	var idx int
+	var blob CCI_BLOB
+	rows.Scan(&idx, &blob)
+	fmt.Printf("idx : %d, buf : %x\n", idx, blob.Buf())
 }
 

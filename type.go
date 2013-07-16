@@ -5,7 +5,6 @@ package cubrid
 */
 import "C"
 
-import "unsafe"
 //import "log"
 
 type CCI_DATE struct {
@@ -35,7 +34,7 @@ type CCI_SET struct {
 }
 
 type CCI_BLOB struct {
-	_BLOB C.T_CCI_BLOB
+	_BLOB []byte
 }
 
 type CCI_CLOB struct {
@@ -43,40 +42,40 @@ type CCI_CLOB struct {
 }
 
 /*-----------------------------------------------*/
-func (date *CCI_DATE) yr() uint {
+func (date *CCI_DATE) Yr() uint {
 	return uint(date._DATE.yr)
 }
 
-func (date *CCI_DATE) mon() uint {
+func (date *CCI_DATE) Mon() uint {
 	return uint(date._DATE.mon)
 }
 
-func (date *CCI_DATE) day() uint {
+func (date *CCI_DATE) Day() uint {
 	return uint(date._DATE.day)
 }
 
-func (date *CCI_DATE) hh() uint {
+func (date *CCI_DATE) Hh() uint {
 	return uint(date._DATE.hh)
 }
 
-func (date *CCI_DATE) mm() uint {
+func (date *CCI_DATE) Mm() uint {
 	return uint(date._DATE.mm)
 }
 
-func (date *CCI_DATE) ss() uint {
+func (date *CCI_DATE) Ss() uint {
 	return uint(date._DATE.ss)
 }
 
-func (date *CCI_DATE) ms() uint {
+func (date *CCI_DATE) Ms() uint {
 	return uint(date._DATE.ms)
 }
 
 /**************************************/
-func (bit *CCI_BIT) size() int {
+func (bit *CCI_BIT) Size() int {
 	return int(bit._BIT.size)
 }
 
-func (bit *CCI_BIT) buf() string {
+func (bit *CCI_BIT) Buf() string {
 	return C.GoStringN(bit._BIT.buf, bit._BIT.size)
 }
 
@@ -89,18 +88,19 @@ func (set *CCI_SET) Size() int {
 	return set.size
 }
 
-func (set *CCI_SET) makeBuf(size int) {
+func (set *CCI_SET) MakeBuf(size int) {
 	set.size = size
 	set.buf = make([]string, size)
 }
 
-func (set *CCI_SET) setBuf(idx int, buf string) {
+func (set *CCI_SET) SetBuf(idx int, buf string) {
 	set.buf[idx] = buf
 }
 
 /*************************************/
-func (blob *CCI_BLOB) buf() unsafe.Pointer {
-	return unsafe.Pointer(blob._BLOB)
+func (blob *CCI_BLOB) Buf() []byte {
+	//log.Printf("type:%x", blob._BLOB)
+	return blob._BLOB
 }
 
 /*************************************/

@@ -92,10 +92,10 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 	var ind C.int
 	for i = C.int(1); i <= col_count; i++ {
 		columnType = C.ex_cci_get_result_info_type(col_info, i)
-		log.Printf("columnType : %d", int(columnType))
+		//log.Printf("columnType : %d", int(columnType))
 		switch columnType {
 		case C.CCI_U_TYPE_CHAR, C.CCI_U_TYPE_STRING, C.CCI_U_TYPE_NCHAR, C.CCI_U_TYPE_VARNCHAR:
-			log.Println("cci_a_type_str")
+			//log.Println("cci_a_type_str")
 			var buf *C.char
 			err = C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_STR, unsafe.Pointer(&buf), &ind)
 			if int(err) < 0 {
@@ -103,52 +103,55 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 			}
 			dest[int(i - 1)] = C.GoString(buf)
 		case C.CCI_U_TYPE_INT, C.CCI_U_TYPE_NUMERIC, C.CCI_U_TYPE_SHORT:
-			log.Println("cci_a_type_int")
+			//log.Println("cci_a_type_int")
 			var buf C.int
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_INT, unsafe.Pointer(&buf), &ind)
 			dest[int(i - 1)] = int(buf)
  		case C.CCI_U_TYPE_FLOAT:
-			log.Println("cci_a_type_float")
+			//log.Println("cci_a_type_float")
 			var buf C.float
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_FLOAT, unsafe.Pointer(&buf), &ind)
 			dest[int(i - 1)] = float64(buf)
 		case C.CCI_U_TYPE_DOUBLE:
-			log.Println("cci_a_type_double")
+			//log.Println("cci_a_type_double")
 			var buf C.double
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_DOUBLE, unsafe.Pointer(&buf), &ind)
 			dest[int(i - 1)] = float64(buf)
 		case C.CCI_U_TYPE_BIT, C.CCI_U_TYPE_VARBIT:
-			log.Println("cci_a_type_bit")
+			//log.Println("cci_a_type_bit")
 			var buf C.T_CCI_BIT
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_BIT, unsafe.Pointer(&buf), &ind)
 			_bit := CCI_BIT{ buf }
 			dest[int(i - 1)] = _bit
 		case C.CCI_U_TYPE_DATE, C.CCI_U_TYPE_TIME, C.CCI_U_TYPE_TIMESTAMP:
-			log.Println("cci_a_type_date")
+			//log.Println("cci_a_type_date")
 			var buf C.T_CCI_DATE
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_DATE, unsafe.Pointer(&buf), &ind)
 
 			_date := CCI_DATE{ buf }
 			dest[int(i - 1)] = _date
-		case /*C.CCI_U_TYPE_SET, C.CCI_U_TYPE_MULTISET, C.CCI_U_TYPE_SEQUENCE,*/ C.CCI_U_TYPE_OBJECT, C.CCI_U_TYPE_RESULTSET:
-			log.Println("cci_a_type_set")
-			//var buf C.T_CCI_SET
-			//C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_SET, unsafe.Pointer(&buf), &ind)
-			//_set := CCI_SET { buf }
-			//dest[int(i - 1)] = _set
+		//case C.CCI_U_TYPE_OBJECT, C.CCI_U_TYPE_RESULTSET:
+			//log.Println("cci_a_type_set")
 		case C.CCI_U_TYPE_BIGINT:
-			log.Println("cci_a_type_bigint")
+			//log.Println("cci_a_type_bigint")
 			var buf C.int64_t
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_BIGINT, unsafe.Pointer(&buf), &ind)
 			dest[int(i - 1)] = int64(buf)
 		case C.CCI_U_TYPE_BLOB:
-			log.Println("cci_a_type_blob")
-			var buf C.T_CCI_BLOB
-			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_BLOB, unsafe.Pointer(&buf), &ind)
-			_blob := CCI_BLOB { buf }
+			//log.Println("cci_a_type_blob")
+			var blob C.T_CCI_BLOB
+			var size C.longlong
+			var buf string
+			cBuf := C.CString(buf)
+			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_BLOB, unsafe.Pointer(&blob), &ind)
+			size = C.cci_blob_size(blob)
+			C.cci_blob_read(rows.s.c.con, blob, 0, C.int(size), cBuf, &cci_error)
+			_blob := CCI_BLOB { _BLOB : C.GoBytes(unsafe.Pointer(cBuf), C.int(size)) }
+			C.cci_blob_free(blob)
+			C.free(unsafe.Pointer(cBuf))
 			dest[int(i - 1)] = _blob
 		case C.CCI_U_TYPE_CLOB:
-			log.Println("cci_u_type_clob")
+			//log.Println("cci_u_type_clob")
 			var clob C.T_CCI_CLOB
 			var size C.longlong
 			var buf string
@@ -162,7 +165,7 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 			dest[int(i - 1)] = _clob
 		default:
 			if int(C.ex_cci_is_collection_type(columnType)) == 1 {
-				log.Println("ex_cci_is_set_type")
+				//log.Println("ex_cci_is_set_type")
 				var set C.T_CCI_SET
 				C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_SET, unsafe.Pointer(&set), &ind)
 				if(int(ind) == -1) {
@@ -174,14 +177,14 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 				set_size = C.cci_set_size(set)
 
 				var _set CCI_SET
-				_set.makeBuf(int(set_size))
+				_set.MakeBuf(int(set_size))
 				for j := C.int(0); j < set_size; j++ {
 					res := C.cci_set_get(set, j+1, C.CCI_A_TYPE_STR, unsafe.Pointer(&buf), &ind)
 					if res < 0 {
 						C.cci_set_free(set)
 						return nil
 					}
-					_set.setBuf(int(j), C.GoString(buf))
+					_set.SetBuf(int(j), C.GoString(buf))
 				}
 				dest[int(i - 1)] = _set
 				C.cci_set_free(set)
