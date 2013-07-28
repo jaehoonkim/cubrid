@@ -4,8 +4,8 @@ CUBRID Database driver for Go
 package cubrid
 
 /*
-#cgo CFLAGS: -I./CUBRID/include
-#cgo LDFLAGS: -L./CUBRID/lib -lcascci -lnsl
+#cgo CFLAGS: -I../CUBRID/include
+#cgo LDFLAGS: -L../CUBRID/lib -lcascci -lnsl
 #include "cas_cci.h"
 */
 import "C"
