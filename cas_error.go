@@ -1,4 +1,4 @@
-package gci
+package cubrid
 
 const (
 	ER_DBMS = -10000

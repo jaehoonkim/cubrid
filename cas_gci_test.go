@@ -1,4 +1,4 @@
-package gci
+package cubrid
 
 import (
 	"testing"
