@@ -12,7 +12,7 @@ import (
 )
 
 type cubridConn struct {
-	con C.int
+	con int
 }
 
 
