@@ -7,6 +7,17 @@ import "C"
 
 //import "log"
 
+type AUTOCOMMIT_MODE int
+const (
+	AUTOCOMMIT_FALSE AUTOCOMMIT_MODE iota
+	AUTOCOMMIT_TRUE
+)
+
+type CCI_ERROR {
+	err_code int
+	err_msg string
+}
+
 type CCI_DATE struct {
 	_DATE C.T_CCI_DATE
 }

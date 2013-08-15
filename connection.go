@@ -1,9 +1,5 @@
 package cubrid
 
-/*
-#include "cas_cci.h"
-*/
-import "C"
 import (
 	"database/sql/driver"
 	"fmt"
@@ -17,29 +13,23 @@ type cubridConn struct {
 
 
 func (c *cubridConn) Prepare(query string) (driver.Stmt, error) {
-	//log.Println("cubridConn:Prepare")
-	var cQuery *C.char = C.CString(query)
-	defer C.free(unsafe.Pointer(cQuery))
-	var req C.int
-	var cci_error C.T_CCI_ERROR
+	var req int
+	var cci_error CCI_ERROR
 	stmt := &cubridStmt { c: c }
-	req = C.cci_prepare(c.con, cQuery, 0, &cci_error)
+	req, cci_error = gci_prepare(c.con, query, 0)
 	if req  < 0 {
 		c.Close()
 		return nil, fmt.Errorf("error : %d, %s", cci_error.err_code, cci_error.err_msg)
 	}
 	stmt.req = req
-	//var param_cnt C.int
-	//param_cnt = C.cci_get_bind_num(req)
-	//log.Printf("cubridConn:Prepare:param_cnt : %d\n", int(param_cnt))
 	return stmt, nil
 }
 
 func (c *cubridConn) Close() error {
 	//log.Println("cubridConn:Close")
-	var cci_error C.T_CCI_ERROR
-	var err_no C.int
-	err_no = C.cci_disconnect(c.con, &cci_error)
+	var cci_error CCI_ERROR
+	var err_no int
+	err_no, cci_error = gci_disconnect(c.con)
 	if err_no < 0 {
 		return fmt.Errorf("error: %d, %s", cci_error.err_code, cci_error.err_msg)
 	}
@@ -52,10 +42,8 @@ func (c *cubridConn) Close() error {
 */
 func (c *cubridConn) Begin() (driver.Tx, error) {
 	//log.Println("cubridConn:Begin")
-	var con C.int
-	var err C.int
-	con = c.con
-	err = C.cci_set_autocommit(con, C.CCI_AUTOCOMMIT_FALSE)
+	var err int
+	err = gci_set_autocommit(c.con, AUTOCOMMIT_FALSE)
 	if err == 0 {
 		tx := &cubridTx{ c: c }
 		return tx, nil

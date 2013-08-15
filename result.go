@@ -1,9 +1,5 @@
 package cubrid
 
-/*
-#include "cas_cci.h"
-*/
-import "C"
 import (
 	"fmt"
 	"unsafe"

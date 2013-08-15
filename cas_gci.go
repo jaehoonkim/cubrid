@@ -44,3 +44,70 @@ func gci_connect(ip string, port int, db_name string, db_user string, db_passwor
 	return int(con)
 
 }
+
+func gci_prepare(conn_handle int, sql_stmt string, flag byte) (int, CCI_ERROR) {
+	var cHandle C.int = C.int(conn_handle)
+	var cQuery *C.char = C.CString(sql_stmt)
+	var cci_error C.T_CCI_ERROR
+	var req C.int
+	var err CCI_ERROR
+
+	defer C.free(unsafe.Pointer(cQuery)
+
+	req = C.cci_prepare(cHandle, cQuery, 0, &cci_error)
+	err.err_code = int(cci_error.err_code)
+	err.err_msg = C.GoString(cci_error.err_msg)
+
+	return int(req), err
+}
+
+func gci_disconnect(conn_handle int) (int, CCI_ERROR) {
+	var cHandle C.int = C.int(conn_handle)
+	var cci_error C.T_CCI_ERROR
+	var res C.int
+	var err CCI_ERROR
+
+	res = C.cci_disconnect(cHandle, &cci_error)
+	err.err_code = int(cci_error.err_code)
+	err.err_msg = C.GoString(cci_error.err_msg)
+
+	return int(res), err
+}
+
+func gci_close_req_handle(req_handle int) int {
+	var err C.int
+	var handle C.int = C.int(req_handle)
+	err = C.cci_close_req_handle(handle)
+
+	return int(err)
+}
+
+func gci_get_bind_num(req_handle int) int {
+	var param_cnt C.int
+	var handle C.int = C.int(req_handle)
+	param_cnt = C.cci_get_bind_num(handle)
+
+	return int(param_cnt)
+}
+
+func gci_execute(req_handle int, flag int, max_col_size) int, CCI_ERROR {
+	var res C.int
+	var cci_error C.T_CCI_ERROR
+	var handle C.int = C.int(req_handle)
+	var err CCI_ERROR
+
+	res = C.cci_execute(handle, flag, max_col_size, &cci_error)
+	err.err_code = int(cci_error.err_code)
+	err.err_msg = C,GoString(cci_error.err_msg)
+
+	return int(res), err
+}
+
+func gci_set_autocommit(conn_handle int autocommit_mode AUTOCOMMIT_MODE) int {
+	var res C.int
+	var handle C.int = C.int(conn_handle)
+	var mode C.int = C.int(autocommit_mode)
+
+	res = C.cci_set_autocommit(handle, mode)
+	return int(res)
+}

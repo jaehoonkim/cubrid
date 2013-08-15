@@ -1,9 +1,5 @@
 package cubrid
 
-/*
-#include "cas_cci.h"
-*/
-import "C"
 import (
 	"database/sql/driver"
 	"fmt"
@@ -14,13 +10,12 @@ import (
 
 type cubridStmt struct {
 	c *cubridConn
-	req C.int
+	req int
 }
 
 func (s *cubridStmt) Close() error {
 	//log.Println("cubridStmt:Close")
-	var err C.int
-	err = C.cci_close_req_handle(s.req)
+	err := gci_close_req_handle(s.req)
 	if err == 0 {
 		return nil
 	}
@@ -29,13 +24,12 @@ func (s *cubridStmt) Close() error {
 
 func (s *cubridStmt) NumInput() int {
 	//log.Println("cubridStmt:NumInput")
-	var param_cnt C.int
-	param_cnt = C.cci_get_bind_num(s.req)
+	param_cnt := gci_get_bind_num(s.req)
 	if param_cnt < 0 {
 		fmt.Errorf("cci_get_bind_num err : %d", param_cnt)
 	}
 	//log.Printf("numInput:%d\n", int(param_cnt))
-	return int(param_cnt)
+	return param_cnt
 }
 
 func (s *cubridStmt) Exec(args []driver.Value) (driver.Result, error) {
@@ -60,16 +54,16 @@ func (s *cubridStmt) Query(args []driver.Value) (driver.Rows, error) {
 
 func (s *cubridStmt) execute(args []driver.Value) (error) {
 	//log.Println("cubridStmt:execute")
-	var err C.int
-	var cci_error C.T_CCI_ERROR
+	var res int
+	var cci_error CCI_ERROR
 	if args != nil {
 		err := s.bindParam(args)
 		if err != nil {
 			return err
 		}
 	}
-	err = C.cci_execute(s.req, 0, 0, &cci_error)
-	if int(err) < 0 {
+	res, cci_error = gci_execute(s.req, 0, 0)
+	if err < 0 {
 		return fmt.Errorf("cci_execute err: %d, %s", cci_error.err_code, cci_error.err_msg)
 	}
 
