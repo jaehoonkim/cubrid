@@ -9,11 +9,16 @@ import "C"
 
 type AUTOCOMMIT_MODE int
 const (
-	AUTOCOMMIT_FALSE AUTOCOMMIT_MODE iota
+	AUTOCOMMIT_FALSE AUTOCOMMIT_MODE = iota
 	AUTOCOMMIT_TRUE
 )
 
-type CCI_ERROR {
+const (
+	TRAN_COMMIT = 1
+	TRAN_ROLLBACK = 2
+)
+
+type CCI_ERROR struct {
 	err_code int
 	err_msg string
 }

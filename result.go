@@ -2,8 +2,6 @@ package cubrid
 
 import (
 	"fmt"
-	"unsafe"
-	"strconv"
 )
 
 type cubridResult struct {
@@ -12,30 +10,24 @@ type cubridResult struct {
 
 
 func (result *cubridResult) LastInsertId() (int64, error) {
-	var err C.int
-	var conn_handle C.int
-	conn_handle = result.c.con
-	var value *C.char
-	var cci_error C.T_CCI_ERROR
-	err = C.cci_get_last_insert_id(conn_handle, unsafe.Pointer(value), &cci_error)
-	if err < 0 {
-		return 0, fmt.Errorf("cci_get_last_insert_id err: %d", err)
+	var last_id int64
+	var cci_error CCI_ERROR
+
+	last_id, cci_error = gci_get_last_insert_id(result.c.con)
+	if last_id < 0 {
+		return 0, fmt.Errorf("cci_get_last_insert_id err: %d", last_id)
 	}
-	id := C.GoString(value)
-	res, _ := strconv.ParseInt(id, 0, 64)
-	return res, nil
+
+	return last_id, nil
 }
 
 func (result *cubridResult) RowsAffected() (int64, error) {
-	var err C.int
-	var conn_handle C.int
-	conn_handle = result.c.con
-	var row_count C.int
-	var cci_error C.T_CCI_ERROR
-	err = C.cci_row_count(conn_handle, &row_count, &cci_error)
-	if err < 0 {
+	var row_count int64
+	var cci_error CCI_ERROR
+	row_count, cci_error = gci_row_count(result.c.con)
+	if cci_error.err_code < 0 {
 		return 0, fmt.Errorf("cci_row_count err: %d", cci_error.err_code)
 	}
-	return int64(row_count), nil
+	return row_count, nil
 }
 

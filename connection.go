@@ -3,7 +3,6 @@ package cubrid
 import (
 	"database/sql/driver"
 	"fmt"
-	"unsafe"
 	"log"
 )
 

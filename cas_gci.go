@@ -14,6 +14,7 @@ int ex_cci_connect(char *ip, int port, char *db_name, char *db_user, char *db_pa
 import "C"
 import (
 	"unsafe"
+	"strconv"
 )
 
 func gci_init() {
@@ -52,7 +53,7 @@ func gci_prepare(conn_handle int, sql_stmt string, flag byte) (int, CCI_ERROR) {
 	var req C.int
 	var err CCI_ERROR
 
-	defer C.free(unsafe.Pointer(cQuery)
+	defer C.free(unsafe.Pointer(cQuery))
 
 	req = C.cci_prepare(cHandle, cQuery, 0, &cci_error)
 	err.err_code = int(cci_error.err_code)
@@ -90,7 +91,7 @@ func gci_get_bind_num(req_handle int) int {
 	return int(param_cnt)
 }
 
-func gci_execute(req_handle int, flag int, max_col_size) int, CCI_ERROR {
+func gci_execute(req_handle int, flag int, max_col_size int) (int, CCI_ERROR) {
 	var res C.int
 	var cci_error C.T_CCI_ERROR
 	var handle C.int = C.int(req_handle)
@@ -98,7 +99,7 @@ func gci_execute(req_handle int, flag int, max_col_size) int, CCI_ERROR {
 
 	res = C.cci_execute(handle, flag, max_col_size, &cci_error)
 	err.err_code = int(cci_error.err_code)
-	err.err_msg = C,GoString(cci_error.err_msg)
+	err.err_msg = C.GoString(cci_error.err_msg)
 
 	return int(res), err
 }
@@ -110,4 +111,53 @@ func gci_set_autocommit(conn_handle int autocommit_mode AUTOCOMMIT_MODE) int {
 
 	res = C.cci_set_autocommit(handle, mode)
 	return int(res)
+}
+
+func gci_end_tran(conn_handle int, tran_type int) (int, CCI_ERROR) {
+	var res C.int
+	var handle C.int = C.int(conn_handle)
+	var cci_error C.T_CCI_ERROR
+	var err CCI_ERROR
+
+	res = C.cci_end_tran(handle, tran_type, &cci_error)
+	err.err_code = int(cci_error.err_code)
+	err.err_msg = C.GoString(cci_error.err_msg)
+
+	return int(res), err
+}
+
+func gci_get_last_insert_id(conn_handle int) (int64, CCI_ERROR) {
+	var res C.int
+	var handle C.int = C.int(conn_handle)
+	var cci_error C.T_CCI_ERROR
+	var err CCI_ERROR
+	var value *C.char
+	var nid int64
+
+	res = C.cci_get_last_insert_id(handle, unsafe.Pointer(value), &cci_error)
+	err.err_code = int(cci_error.err_code)
+	err.err_msg = C.GoString(cci_error.err_msg)
+	if res < 0 {
+		return int64(res), err
+	}
+
+	id := C.GoString(value)
+	nid, _ = strconv.ParseInt(id, 0, 64)
+	return nid, err
+}
+
+func gci_row_count(conn_handle int) (int64, CCI_ERROR) {
+	var res C.int
+	var handle C.int = C.int(conn_handle)
+	var row_count C.int
+	var cci_error C.T_CCI_ERROR
+	var err CCI_ERROR
+
+	res = C.cci_row_count(handle, &row_count, &cci_error)
+	if res < 0 {
+		err.err_code = int(cci_error.err_code)
+		err.err_msg = C.GoString(cci_error.err_msg)
+	}
+
+	return int64(row_count), err
 }
