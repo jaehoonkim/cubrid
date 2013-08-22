@@ -8,14 +8,14 @@ type cubridTx struct {
 func (tx *cubridTx) Commit() error {
 	var conn_handle int
 	conn_handle = tx.c.con
-	var err int
-	var cci_error CCI_ERROR
+	var res int
+	var err GCI_ERROR
 
-	err, cci_error = gci_end_tran(conn_handle, TRAN_COMMIT)
-	if err < 0 {
-		var err_discon CCI_ERROR
+	res, err= gci_end_tran(conn_handle, TRAN_COMMIT)
+	if res < 0 {
+		var err_discon GCI_ERROR
 		_, err_discon = gci_disconnect(conn_handle)
-		return fmt.Errorf("commit error : %d", cci_error.err_code)
+		return fmt.Errorf("commit error : %d", err.Err_code)
 	}
 	return nil
 }
@@ -23,14 +23,14 @@ func (tx *cubridTx) Commit() error {
 func (tx *cubridTx) Rollback() error {
 	var conn_handle int
 	conn_handle = tx.c.con
-	var err int
-	var cci_error CCI_ERROR
+	var res int
+	var err GCI_ERROR
 
-	err, cci_error = gci_end_tran(conn_handle, TRAN_ROLLBACK)
-	if err < 0 {
-		var err_discon CCI_ERROR
+	res, err = gci_end_tran(conn_handle, TRAN_ROLLBACK)
+	if res < 0 {
+		var err_discon GCI_ERROR
 		_, err_discon = gci_disconnect(conn_handle)
-		return fmt.Errorf("commit error : %d", cci_error.err_code)
+		return fmt.Errorf("commit error : %d", err.Err_code)
 	}
 	return nil
 }

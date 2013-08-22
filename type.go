@@ -18,9 +18,89 @@ const (
 	TRAN_ROLLBACK = 2
 )
 
+type GCI_A_TYPE int
+const (
+	_ = iota
+	A_TYPE_STR GCI_A_TYPE = iota + 1
+	A_TYPE_INT
+	A_TYPE_FLOAT
+	A_TYPE_DOUBLE
+	A_TYPE_BIT
+	A_TYPE_DATE
+	A_TYPE_SET
+	A_TYPE_BIGINT
+	A_TYPE_BLOB
+	A_TYPE_CLOB
+	A_TYPE_LAST
+)
+
+type GCI_U_TYPE int
+const (
+	U_TYPE_FIRST GCI_U_TYPE = 0
+	U_TYPE_UNKNOWN GCI_U_TYPE = 0
+	U_TYPE_NULL GCI_U_TYPE = 0
+	
+	U_TYPE_CHAR GCI_U_TYPE = 1
+	U_TYPE_STRING GCI_U_TYPE = 2
+	U_TYPE_NCHAR GCI_U_TYPE = 3
+	U_TYPE_VARCHAR GCI_U_TYPE = 4
+	U_TYPE_BIT GCI_U_TYPE = 5
+	U_TYPE_VARBIT GCI_U_TYPE = 6
+	U_TYPE_NUMERIC GCI_U_TYPE = 7
+	U_TYPE_INT GCI_U_TYPE = 8
+	U_TYPE_SHORT GCI_U_TYPE = 9
+	U_TYPE_MONETARY GCI_U_TYPE = 10
+	U_TYPE_FLOAT GCI_U_TYPE = 11
+	U_TYPE_DOUBL GCI_U_TYPE = 12
+	U_TYPE_DATE GCI_U_TYPE = 13
+	U_TYPE_TIME GCI_U_TYPE = 14
+	U_TYPE_TIMESTAMP GCI_U_TYPE = 15
+	U_TYPE_SET GCI_U_TYPE = 16
+	U_TYPE_MULTISET GCI_U_TYPE = 17
+	U_TYPE_SEQUENCE GCI_U_TYPE = 18
+	U_TYPE_OBJECT GCI_U_TYPE = 19
+	U_TYPE_RESULTSET GCI_U_TYPE = 20
+	U_TYPE_BIGINT GCI_U_TYPE = 21
+	U_TYPE_DATETIME GCI_U_TYPE = 22
+	U_TYPE_BLOB GCI_U_TYPE = 23
+	U_TYPE_CLOB GCI_U_TYPE = 24
+	U_TYPE_ENUM GCI_U_TYPE = 25
+
+	U_TYPE_LAST GCI_U_TYPE = U_TYPE_ENUM
+
+
+)
+
+const GCI_BIND_PTR int = 1
+/*
 type CCI_ERROR struct {
-	err_code int
-	err_msg string
+	Err_code int
+	Err_msg string
+}
+*/
+type GCI_ERROR struct {
+	Err_code int
+	Err_msg string
+}
+
+type GCI_COL_INFO struct {
+	u_type GCI_U_TYPE
+	is_non_null string
+	scale int16
+	precision int
+	col_name string
+	real_attr string
+	class_name string
+	default_value string
+	is_auto_increment bool
+	is_unique_key bool
+	is_primary_key bool
+	is_foreign_key bool
+	is_reverse_index bool
+	is_reverse_unique bool
+	is_shared bool
+
+
 }
 
 type CCI_DATE struct {

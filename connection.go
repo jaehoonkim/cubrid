@@ -13,12 +13,12 @@ type cubridConn struct {
 
 func (c *cubridConn) Prepare(query string) (driver.Stmt, error) {
 	var req int
-	var cci_error CCI_ERROR
+	var cci_error GCI_ERROR
 	stmt := &cubridStmt { c: c }
 	req, cci_error = gci_prepare(c.con, query, 0)
 	if req  < 0 {
 		c.Close()
-		return nil, fmt.Errorf("error : %d, %s", cci_error.err_code, cci_error.err_msg)
+		return nil, fmt.Errorf("error : %d, %s", cci_error.Err_code, cci_error.Err_msg)
 	}
 	stmt.req = req
 	return stmt, nil
@@ -26,11 +26,11 @@ func (c *cubridConn) Prepare(query string) (driver.Stmt, error) {
 
 func (c *cubridConn) Close() error {
 	//log.Println("cubridConn:Close")
-	var cci_error CCI_ERROR
+	var err GCI_ERROR
 	var err_no int
-	err_no, cci_error = gci_disconnect(c.con)
+	err_no, err = gci_disconnect(c.con)
 	if err_no < 0 {
-		return fmt.Errorf("error: %d, %s", cci_error.err_code, cci_error.err_msg)
+		return fmt.Errorf("error: %d, %s", err.Err_code, err.Err_msg)
 	}
 	return nil
 }

@@ -4,7 +4,6 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"log"
-	"unsafe"
 	"time"
 )
 
@@ -55,48 +54,48 @@ func (s *cubridStmt) Query(args []driver.Value) (driver.Rows, error) {
 func (s *cubridStmt) execute(args []driver.Value) (error) {
 	//log.Println("cubridStmt:execute")
 	var res int
-	var cci_error CCI_ERROR
+	var gciError GCI_ERROR
 	if args != nil {
 		err := s.bindParam(args)
 		if err != nil {
 			return err
 		}
 	}
-	res, cci_error = gci_execute(s.req, 0, 0)
-	if err < 0 {
-		return fmt.Errorf("cci_execute err: %d, %s", cci_error.err_code, cci_error.err_msg)
+	res, gciError = gci_execute(s.req, 0, 0)
+	if gciError.Err_code < 0 {
+		return fmt.Errorf("cci_execute err: %d, %s", gciError.Err_code, gciError.Err_msg)
 	}
 
 	return nil
 }
 
+/*
+- cubrid cci 문서의 내용
+  prepared statement에서 bind변수에 데이터를 바인딩하기 위하여 사용되는 함수이다.
+  이때, 주어진 a_type의 value의 값을 실제 바인딩되어야 하는 타입으로 변환하여 저장한다.
+  이후, cci_execute()가 호출될 때 저장된 데이터가 서버로 전송된다.:
+*/
 func (s *cubridStmt) bindParam(args []driver.Value) error {
 	//log.Println("cbubridStmt:bindParam")
-	var ss string
-	var err C.int
+	var res int
 	for i, arg := range args {
 		switch arg.(type) {
 		case int64:
-			c_param := C.int(arg.(int64))
-			err = C.cci_bind_param(s.req, C.int(i + 1), C.CCI_A_TYPE_INT, unsafe.Pointer(&c_param), C.CCI_U_TYPE_INT, C.CCI_BIND_PTR)
-			if int(err) < 0 {
-				return fmt.Errorf("cci_bind_param : %d", int(err))
+			res = gci_bind_param_int(s.req, i + 1, arg, GCI_BIND_PTR)
+			if res < 0 {
+				return fmt.Errorf("cci_bind_param : %d", res)
 			}
 		case string:
-			ss = fmt.Sprint(arg)
-			//log.Printf("cubridStmt:bindParam:%s\n", ss)
-			err = C.cci_bind_param(s.req, C.int(i+1), C.CCI_A_TYPE_STR, unsafe.Pointer(C.CString(ss)), C.CCI_U_TYPE_STRING, C.CCI_BIND_PTR)
-			if err < 0 {
-				return fmt.Errorf("cci_bind_param : %d", err)
+			res = gci_bind_param_string(s.req, i + 1, arg, GCI_BIND_PTR)
+			if res < 0 {
+				return fmt.Errorf("cci_bind_param : %d", res)
 			}
 		case time.Time:
 			log.Println("statement:bindParam:time.Tile")
 		case float64:
-			log.Println("statement:bindParam:float64")
-			c_param := C.float(arg.(float64))
-			err = C.cci_bind_param(s.req, C.int(i + 1), C.CCI_A_TYPE_FLOAT, unsafe.Pointer(&c_param), C.CCI_U_TYPE_FLOAT, C.CCI_BIND_PTR)
-			if int(err) < 0 {
-				return fmt.Errorf("cci_bind_param : %d", int(err))
+			res = gci_bind_param_float(s.req, i + 1, arg, GCI_BIND_PTR)
+			if res < 0 {
+				return fmt.Errorf("cci_bind_param : %d", res)
 			}
 		case bool:
 			log.Println("statement:bindParam:bool")
@@ -108,3 +107,4 @@ func (s *cubridStmt) bindParam(args []driver.Value) error {
 	}
 	return nil
 }
+
