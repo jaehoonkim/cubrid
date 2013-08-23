@@ -188,7 +188,7 @@ func gci_bind_param_string(req_handle int, index int, value interface{}, flag in
 	return int(res)
 }
 
-func gci_bind_param_float(req_handle int, index int, value interface{}, falg int) int {
+func gci_bind_param_float(req_handle int, index int, value interface{}, flag int) int {
 	var handle C.int = C.int(req_handle)
 	var res C.int
 
@@ -199,6 +199,13 @@ func gci_bind_param_float(req_handle int, index int, value interface{}, falg int
 }
 
 func gci_get_result_int(req_handle int) (GCI_COL_INFO, GCI_CUBRID_STMT, int) {
+	//var handle C.int = C.int(req_handle)
+	//var col_info *C.CCI_COL_INFO
+	//var cubrid_stmt C.CCI_CUBRID_STMT
+	//var col_count C.int
+	var gci_col_info GCI_COL_INFO
+	//col_info = C.cci_get_result_info(handle, 
 
+	return gci_col_info, 0, 0
 }
 
