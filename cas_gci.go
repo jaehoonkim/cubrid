@@ -208,7 +208,7 @@ func gci_get_result_int(req_handle int) (GCI_COL_INFO, GCI_CUBRID_STMT, int) {
 
 	col_info = C.cci_get_result_info(handle, &cubrid_stmt, &col_count)
 	gci_cubrid_stmt = GCI_CUBRID_STMT(cubrid_stmt)
-	gci_col_info.u_type = GCI_U_TYPE(col_info.type)
+	gci_col_info.u_type = GCI_U_TYPE(col_info._type)
 	gci_col_info.is_non_null = C.GoString(col_info.is_non_null)
 	gci_col_info.scale = int16(col_info.scale)
 	gci_col_info.precision = int(col_info.precision)
