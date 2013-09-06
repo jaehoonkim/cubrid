@@ -11,6 +11,22 @@ int ex_cci_connect(char *ip, int port, char *db_name, char *db_user, char *db_pa
 	int con = cci_connect(ip, port, db_name, db_user, db_password);
 	return con;
 }
+
+char* ex_cci_get_result_info_name(T_CCI_COL_INFO* res_info, int index) {
+	return CCI_GET_RESULT_INFO_NAME(res_info, index);
+}
+
+T_CCI_U_TYPE ex_cci_get_result_info_type(T_CCI_COL_INFO* res_info, int index) {
+	return CCI_GET_RESULT_INFO_TYPE(res_info, index);
+}
+
+int ex_cci_is_set_type(T_CCI_U_TYPE type) {
+	return CCI_IS_SET_TYPE(type);
+}
+
+int ex_cci_is_collection_type(T_CCI_U_TYPE type) {
+	return CCI_IS_COLLECTION_TYPE(type);
+}
 */
 import "C"
 import (
@@ -198,21 +214,84 @@ func gci_bind_param_float(req_handle int, index int, value interface{}, flag int
 	return int(res)
 }
 
-func gci_get_result_int(req_handle int) (GCI_COL_INFO, GCI_CUBRID_STMT, int) {
+func gci_get_result_info(req_handle int) (*GCI_COL_INFO, GCI_CUBRID_STMT, int) {
 	var handle C.int = C.int(req_handle)
 	var col_info *C.T_CCI_COL_INFO
 	var cubrid_stmt C.T_CCI_CUBRID_STMT
 	var col_count C.int
-	var gci_col_info GCI_COL_INFO
+	var gci_col_info *GCI_COL_INFO
 	var gci_cubrid_stmt GCI_CUBRID_STMT
 
 	col_info = C.cci_get_result_info(handle, &cubrid_stmt, &col_count)
 	gci_cubrid_stmt = GCI_CUBRID_STMT(cubrid_stmt)
+
+	gci_col_info = new(GCI_COL_INFO)
 	gci_col_info.u_type = GCI_U_TYPE(col_info._type)
-	gci_col_info.is_non_null = C.GoString(col_info.is_non_null)
+	gci_col_info.is_non_null = C.GoString(&col_info.is_non_null)
 	gci_col_info.scale = int16(col_info.scale)
 	gci_col_info.precision = int(col_info.precision)
 
 	return gci_col_info, gci_cubrid_stmt, int(col_count)
 }
+
+func gci_get_result_info_name(col_info *GCI_COL_INFO, idx int) string {
+	var c_name *C.char
+	var result string
+	
+	// todo : GCI_COL_INFO -> T_CCI_COL_INFO
+	var cci_col_info *C.T_CCI_COL_INFO
+	cci_col_info = col_info.To()
+	c_name = C.ex_cci_get_result_info_name(cci_col_info, C.int(idx))
+	result = C.GoString(c_name)
+	return result
+}
+
+func gci_get_result_info_type(col_info *GCI_COL_INFO, idx int) GCI_U_TYPE {
+	var result GCI_U_TYPE
+	var cci_u_type C.T_CCI_U_TYPE
+	
+	var cci_col_info *C.T_CCI_COL_INFO
+	cci_col_info = col_info.To()
+	cci_u_type = C.ex_cci_get_result_info_type(cci_col_info, C.int(idx))
+
+	result = (GCI_U_TYPE)(cci_u_type)
+	return result
+
+}
+
+func gci_cursor(req_handle int, offset int, origin GCI_CURSOR_POS) (int, GCI_ERROR) {
+	var handle C.int
+	var c_offset C.int
+	var c_origin C.T_CCI_CURSOR_POS
+	var cci_error C.T_CCI_ERROR
+	var err GCI_ERROR
+	var res C.int
+
+	handle = C.int(req_handle)
+	c_offset = C.int(offset)
+	c_origin = C.T_CCI_CURSOR_POS(origin)
+
+	res = C.cci_cursor(handle, c_offset, c_origin, &cci_error)
+	err.Err_code = int(cci_error.err_code)
+	err.Err_msg = C.GoString(&cci_error.err_msg[0])
+
+	return int(res), err
+}
+
+func gci_fetch(req_handle int) (int, GCI_ERROR) {
+	var handle C.int = C.int(req_handle)
+	var cci_error C.T_CCI_ERROR
+	var res C.int
+	var err GCI_ERROR
+
+	res = C.cci_fetch(handle, &cci_error)
+	
+	if res < C.int(0) {
+		err.Err_code = int(cci_error.err_code)
+		err.Err_msg = C.GoString(&cci_error.err_msg[0])
+	}
+
+	return int(res), err
+}
+
 
