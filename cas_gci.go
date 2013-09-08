@@ -294,4 +294,18 @@ func gci_fetch(req_handle int) (int, GCI_ERROR) {
 	return int(res), err
 }
 
+func gci_get_data_string(req_handle int, idx int) (int, string, int) {
+	var handle C.int = C.int(req_handle)
+	var c_idx = C.int(idx)
+	var buf *C.char
+	var res C.int
+	var indicator C.int
+	var data string
+
+	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_STR, unsafe.Pointer(&buf), &indicator)
+	
+	data = C.GoString(buf)
+
+	return int(res), data, int(indicator)
+}
 

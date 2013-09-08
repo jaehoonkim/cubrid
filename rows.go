@@ -68,36 +68,36 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 		columnType = gci_get_result_info_type(col_info, i)
 		
 		switch columnType {
-		case GCI_U_TYPE_CHAR, GCI_U_TYPE_STRING, GCI_U_TYPE_NCHAR, GCI_U_TYPE_VARNCHAR:
+		case U_TYPE_CHAR, U_TYPE_STRING, U_TYPE_NCHAR/*, U_TYPE_VARNCHAR*/:
 			//log.Println("cci_a_type_str")
-			var buf *C.char
-			err = C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_STR, unsafe.Pointer(&buf), &ind)
-			if int(err) < 0 {
-				return fmt.Errorf("get_data err : %d, %d\n", err, int(i))
+			var data string
+			res, data, ind = gci_get_data_string(rows.s.req, i)
+			if res < 0 {
+				return fmt.Errorf("get_data err : %d, %d\n", res, i)
 			}
-			dest[int(i - 1)] = C.GoString(buf)
-		case GCI_U_TYPE_INT, GCI_U_TYPE_NUMERIC, GCI_U_TYPE_SHORT:
+			dest[i - 1] = data
+		case U_TYPE_INT, U_TYPE_NUMERIC, U_TYPE_SHORT:
 			//log.Println("cci_a_type_int")
 			var buf C.int
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_INT, unsafe.Pointer(&buf), &ind)
 			dest[int(i - 1)] = int(buf)
- 		case GCI_U_TYPE_FLOAT:
+ 		case U_TYPE_FLOAT:
 			//log.Println("cci_a_type_float")
 			var buf C.float
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_FLOAT, unsafe.Pointer(&buf), &ind)
 			dest[int(i - 1)] = float64(buf)
-		case GCI_U_TYPE_DOUBLE:
+		case U_TYPE_DOUBLE:
 			//log.Println("cci_a_type_double")
 			var buf C.double
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_DOUBLE, unsafe.Pointer(&buf), &ind)
 			dest[int(i - 1)] = float64(buf)
-		case GCI_U_TYPE_BIT, GCI_U_TYPE_VARBIT:
+		case U_TYPE_BIT, U_TYPE_VARBIT:
 			//log.Println("cci_a_type_bit")
 			var buf C.T_CCI_BIT
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_BIT, unsafe.Pointer(&buf), &ind)
 			_bit := CCI_BIT{ buf }
 			dest[int(i - 1)] = _bit
-		case GCI_U_TYPE_DATE, GCI_U_TYPE_TIME, GCI_U_TYPE_TIMESTAMP:
+		case U_TYPE_DATE, U_TYPE_TIME, U_TYPE_TIMESTAMP:
 			//log.Println("cci_a_type_date")
 			var buf C.T_CCI_DATE
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_DATE, unsafe.Pointer(&buf), &ind)
@@ -106,12 +106,12 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 			dest[int(i - 1)] = _date
 		//case C.CCI_U_TYPE_OBJECT, C.CCI_U_TYPE_RESULTSET:
 			//log.Println("cci_a_type_set")
-		case GCI_U_TYPE_BIGINT:
+		case U_TYPE_BIGINT:
 			//log.Println("cci_a_type_bigint")
 			var buf C.int64_t
 			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_BIGINT, unsafe.Pointer(&buf), &ind)
 			dest[int(i - 1)] = int64(buf)
-		case GCI_U_TYPE_BLOB:
+		case U_TYPE_BLOB:
 			//log.Println("cci_a_type_blob")
 			var blob C.T_CCI_BLOB
 			var size C.longlong
@@ -124,7 +124,7 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 			C.cci_blob_free(blob)
 			C.free(unsafe.Pointer(cBuf))
 			dest[int(i - 1)] = _blob
-		case GCI_U_TYPE_CLOB:
+		case U_TYPE_CLOB:
 			//log.Println("cci_u_type_clob")
 			var clob C.T_CCI_CLOB
 			var size C.longlong
