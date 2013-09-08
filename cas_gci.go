@@ -309,3 +309,31 @@ func gci_get_data_string(req_handle int, idx int) (int, string, int) {
 	return int(res), data, int(indicator)
 }
 
+func gci_get_data_int(req_handle int, idx int) (int, int, int) {
+	var handle C.int = C.int(req_handle)
+	var c_idx = C.int(idx)
+	var buf C.int
+	var res C.int
+	var indicator C.int
+	var data int
+
+	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_INT, unsafe.Pointer(&buf), &indicator)
+	data = int(buf)
+
+	return int(res), data, int(indicator)
+}
+
+func gci_get_data_float(req_handle int, idx int) (int, float64, int) {
+	var handle C.int = C.int(req_handle)
+	var c_idx = C.int(idx)
+	var buf C.float
+	var res C.int
+	var indicator C.int
+	var data float64
+	
+	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_FLOAT, unsafe.Pointer(&buf), &indicator)
+	data = float64(buf)
+
+	return int(res), data, int(indicator)
+}
+

@@ -78,14 +78,14 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 			dest[i - 1] = data
 		case U_TYPE_INT, U_TYPE_NUMERIC, U_TYPE_SHORT:
 			//log.Println("cci_a_type_int")
-			var buf C.int
-			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_INT, unsafe.Pointer(&buf), &ind)
-			dest[int(i - 1)] = int(buf)
+			var data int
+			res, data, ind = gci_get_data_int(rows.s.req, i)
+			dest[int(i - 1)] = data
  		case U_TYPE_FLOAT:
 			//log.Println("cci_a_type_float")
-			var buf C.float
-			C.cci_get_data(rows.s.req, i, C.CCI_A_TYPE_FLOAT, unsafe.Pointer(&buf), &ind)
-			dest[int(i - 1)] = float64(buf)
+			var data float64
+			res, data, ind = gci_get_data_float(rows.s.req, i)
+			dest[int(i - 1)] = data
 		case U_TYPE_DOUBLE:
 			//log.Println("cci_a_type_double")
 			var buf C.double
