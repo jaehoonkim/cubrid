@@ -53,7 +53,6 @@ func (s *cubridStmt) Query(args []driver.Value) (driver.Rows, error) {
 
 func (s *cubridStmt) execute(args []driver.Value) (error) {
 	//log.Println("cubridStmt:execute")
-	var res int
 	var gciError GCI_ERROR
 	if args != nil {
 		err := s.bindParam(args)
@@ -61,7 +60,7 @@ func (s *cubridStmt) execute(args []driver.Value) (error) {
 			return err
 		}
 	}
-	res, gciError = gci_execute(s.req, 0, 0)
+	_, gciError = gci_execute(s.req, 0, 0)
 	if gciError.Err_code < 0 {
 		return fmt.Errorf("cci_execute err: %d, %s", gciError.Err_code, gciError.Err_msg)
 	}

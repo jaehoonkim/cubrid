@@ -13,8 +13,7 @@ func (tx *cubridTx) Commit() error {
 
 	res, err= gci_end_tran(conn_handle, TRAN_COMMIT)
 	if res < 0 {
-		var err_discon GCI_ERROR
-		_, err_discon = gci_disconnect(conn_handle)
+		gci_disconnect(conn_handle)
 		return fmt.Errorf("commit error : %d", err.Err_code)
 	}
 	return nil
@@ -28,8 +27,7 @@ func (tx *cubridTx) Rollback() error {
 
 	res, err = gci_end_tran(conn_handle, TRAN_ROLLBACK)
 	if res < 0 {
-		var err_discon GCI_ERROR
-		_, err_discon = gci_disconnect(conn_handle)
+		gci_disconnect(conn_handle)
 		return fmt.Errorf("commit error : %d", err.Err_code)
 	}
 	return nil

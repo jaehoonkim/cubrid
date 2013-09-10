@@ -337,3 +337,118 @@ func gci_get_data_float(req_handle int, idx int) (int, float64, int) {
 	return int(res), data, int(indicator)
 }
 
+func gci_get_data_double(req_handle int, idx int) (int, float64, int) {
+	var handle C.int = C.int(req_handle)
+	var c_idx = C.int(idx)
+	var buf C.double
+	var res C.int
+	var indicator C.int
+	var data float64
+
+	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_DOUBLE, unsafe.Pointer(&buf), &indicator)
+	data = float64(buf)
+
+	return int(res), data, int(indicator)
+}
+
+func gci_get_data_bit(req_handle int, idx int) (int, GCI_BIT, int) {
+	var handle C.int = C.int(req_handle)
+	var c_idx = C.int(idx)
+	var buf C.T_CCI_BIT
+	var res C.int
+	var indicator C.int
+	var data GCI_BIT
+
+	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_BIT, unsafe.Pointer(&buf), &indicator)
+	data.size = int(buf.size)
+	//data.buf = make([]byte, data.size)
+	data.buf = C.GoBytes(unsafe.Pointer(buf.buf), buf.size)
+
+	return int(res), data, int(indicator)
+}
+
+func gci_get_data_date(req_handle int, idx int) (int, GCI_DATE, int) {
+	var handle C.int = C.int(req_handle)
+	var c_idx = C.int(idx)
+	var buf C.T_CCI_DATE
+	var res C.int
+	var indicator C.int
+	var data GCI_DATE
+
+	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_DATE, unsafe.Pointer(&buf), &indicator)
+	data.yr = int(buf.yr)
+	data.mon = int(buf.mon)
+	data.day = int(buf.day)
+	data.hh = int(buf.hh)
+	data.mm = int(buf.mm)
+	data.ss = int(buf.ss)
+	data.ms = int(buf.ms)
+
+	return int(res), data, int(indicator)
+}
+
+func gci_get_data_bigint(req_handle int, idx int) (int, int64, int) {
+	var handle C.int = C.int(req_handle)
+	var c_idx = C.int(idx)
+	var buf C.int64_t
+	var res C.int
+	var indicator C.int
+	var data int64
+
+	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_BIGINT, unsafe.Pointer(&buf), &indicator)
+	data = int64(buf)
+
+	return int(res), data, int(indicator)
+}
+
+func gci_get_data_blob(req_handle int, idx int) (int, GCI_BLOB, int) {
+	var handle C.int = C.int(req_handle)
+	var c_idx = C.int(idx)
+	var buf C.T_CCI_BLOB
+	var res C.int
+	var indicator C.int
+	var data GCI_BLOB
+
+	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_BLOB, unsafe.Pointer(&buf), &indicator)
+	data = GCI_BLOB(buf)
+	
+	return int(res), data, int(indicator)
+}
+
+func gci_blob_size(blob GCI_BLOB) int64 {
+	var size C.longlong
+	var data C.T_CCI_BLOB = C.T_CCI_BLOB(blob)
+	size = C.cci_blob_size(data)
+
+	return int64(size)
+}
+
+func gci_blob_read(con_handle int, blob GCI_BLOB, start_pos int64, length int64) (GCI_BLOB, GCI_ERROR) {
+	var handle C.int = C.int(con_handle)
+	var res C.int
+	var c_start_pos C.longlong = C.longlong(start_pos)
+	var c_length C.int = C.int(length)
+	var c_blob string
+	var cci_error C.T_CCI_ERROR
+	var err GCI_ERROR
+	var data C.T_CCI_BLOB = C.T_CCI_BLOB(blob)
+	var res_blob GCI_BLOB
+
+	c_buf := C.CString(c_blob)
+	defer C.free(unsafe.Pointer(c_buf))
+	res = C.cci_blob_read(handle, data, c_start_pos, c_length, c_buf, &cci_error)
+	if res < C.int(0) {
+		err.Err_code = int(cci_error.err_code)
+		err.Err_msg = C.GoString(&cci_error.err_msg[0])
+	}
+
+	res_blob = GCI_BLOB(c_buf)
+
+
+	return res_blob, err 
+}
+
+func gci_blob_free(blob GCI_BLOB) {
+	var data C.T_CCI_BLOB = C.T_CCI_BLOB(blob) 
+	C.cci_blob_free(data)
+}

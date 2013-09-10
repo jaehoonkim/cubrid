@@ -4,7 +4,7 @@ package cubrid
 #include "cas_cci.h"
 */
 import "C"
-
+import "unsafe"
 //import "log"
 
 type AUTOCOMMIT_MODE int
@@ -173,6 +173,7 @@ type GCI_COL_INFO struct {
 func (col_inf *GCI_COL_INFO) To() (*C.T_CCI_COL_INFO) {
 	var cci_col_info *C.T_CCI_COL_INFO
 	cci_col_info = new(C.T_CCI_COL_INFO)
+	return cci_col_info
 }
 
 type GCI_CUBRID_STMT int
@@ -228,6 +229,16 @@ type CCI_DATE struct {
 	_DATE C.T_CCI_DATE
 }
 
+type GCI_DATE struct {
+	yr int
+	mon int
+	day int
+	hh int
+	mm int
+	ss int
+	ms int
+}
+
 /*
  cubrid manual
  - 비트열은 0과 1로 이루어진 이진 값의 순열(sequence) 이다.
@@ -244,6 +255,11 @@ type CCI_BIT struct {
 	_BIT C.T_CCI_BIT
 }
 
+type GCI_BIT struct {
+	size int
+	buf []byte
+}
+
 type CCI_SET struct {
 	//size C.int
 	size int
@@ -254,9 +270,13 @@ type CCI_BLOB struct {
 	_BLOB []byte
 }
 
+type GCI_BLOB unsafe.Pointer 
+
 type CCI_CLOB struct {
 	_CLOB string
 }
+
+type GCI_CLOB unsafe.Pointer
 
 /*-----------------------------------------------*/
 func (date *CCI_DATE) Yr() uint {
