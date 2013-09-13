@@ -140,12 +140,6 @@ const (
 )
 
 const GCI_BIND_PTR int = 1
-/*
-type CCI_ERROR struct {
-	Err_code int
-	Err_msg string
-}
-*/
 type GCI_ERROR struct {
 	Err_code int
 	Err_msg string
@@ -167,13 +161,6 @@ type GCI_COL_INFO struct {
 	is_reverse_index bool
 	is_reverse_unique bool
 	is_shared bool
-}
-
-// GCI_COL_INFO->T_CCI_COL_INFO : to
-func (col_inf *GCI_COL_INFO) To() (*C.T_CCI_COL_INFO) {
-	var cci_col_info *C.T_CCI_COL_INFO
-	cci_col_info = new(C.T_CCI_COL_INFO)
-	return cci_col_info
 }
 
 type GCI_CUBRID_STMT int
@@ -225,10 +212,6 @@ const (
 	CUBRID_STMT_ALTER_USER
 )
 
-type CCI_DATE struct {
-	_DATE C.T_CCI_DATE
-}
-
 type GCI_DATE struct {
 	yr int
 	mon int
@@ -251,10 +234,6 @@ type GCI_DATE struct {
    ex) X'a'
        0xA
 */
-type CCI_BIT struct {
-	_BIT C.T_CCI_BIT
-}
-
 type GCI_BIT struct {
 	size int
 	buf []byte
@@ -279,41 +258,42 @@ type CCI_CLOB struct {
 type GCI_CLOB unsafe.Pointer
 
 /*-----------------------------------------------*/
-func (date *CCI_DATE) Yr() uint {
-	return uint(date._DATE.yr)
+func (date *GCI_DATE) Yr() uint {
+	return uint(date.yr)
 }
 
-func (date *CCI_DATE) Mon() uint {
-	return uint(date._DATE.mon)
+func (date *GCI_DATE) Mon() uint {
+	return uint(date.mon)
 }
 
-func (date *CCI_DATE) Day() uint {
-	return uint(date._DATE.day)
+func (date *GCI_DATE) Day() uint {
+	return uint(date.day)
 }
 
-func (date *CCI_DATE) Hh() uint {
-	return uint(date._DATE.hh)
+func (date *GCI_DATE) Hh() uint {
+	return uint(date.hh)
 }
 
-func (date *CCI_DATE) Mm() uint {
-	return uint(date._DATE.mm)
+func (date *GCI_DATE) Mm() uint {
+	return uint(date.mm)
 }
 
-func (date *CCI_DATE) Ss() uint {
-	return uint(date._DATE.ss)
+func (date *GCI_DATE) Ss() uint {
+	return uint(date.ss)
 }
 
-func (date *CCI_DATE) Ms() uint {
-	return uint(date._DATE.ms)
+func (date *GCI_DATE) Ms() uint {
+	return uint(date.ms)
 }
 
 /**************************************/
-func (bit *CCI_BIT) Size() int {
-	return int(bit._BIT.size)
+func (bit *GCI_BIT) Size() int {
+	return int(bit.size)
 }
 
-func (bit *CCI_BIT) Buf() string {
-	return C.GoStringN(bit._BIT.buf, bit._BIT.size)
+func (bit *GCI_BIT) Buf() string {
+	//return C.GoStringN(bit.buf, bit.size)
+	return string(bit.buf)
 }
 
 /**************************************/

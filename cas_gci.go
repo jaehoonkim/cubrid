@@ -33,6 +33,8 @@ import (
 	"unsafe"
 	"strconv"
 	"fmt"
+	"reflect"
+	"log"
 )
 
 func gci_init() {
@@ -96,6 +98,7 @@ func gci_disconnect(conn_handle int) (int, GCI_ERROR) {
 func gci_close_req_handle(req_handle int) int {
 	var err C.int
 	var handle C.int = C.int(req_handle)
+
 	err = C.cci_close_req_handle(handle)
 
 	return int(err)
@@ -104,6 +107,7 @@ func gci_close_req_handle(req_handle int) int {
 func gci_get_bind_num(req_handle int) int {
 	var param_cnt C.int
 	var handle C.int = C.int(req_handle)
+
 	param_cnt = C.cci_get_bind_num(handle)
 
 	return int(param_cnt)
@@ -128,6 +132,7 @@ func gci_set_autocommit(conn_handle int autocommit_mode AUTOCOMMIT_MODE) int {
 	var mode C.int = C.int(autocommit_mode)
 
 	res = C.cci_set_autocommit(handle, C.CCI_AUTOCOMMIT_MODE(mode))
+
 	return int(res)
 }
 
@@ -161,6 +166,7 @@ func gci_get_last_insert_id(conn_handle int) (int64, GCI_ERROR) {
 
 	id := C.GoString(value)
 	nid, _ = strconv.ParseInt(id, 0, 64)
+
 	return nid, err
 }
 
@@ -180,17 +186,14 @@ func gci_row_count(conn_handle int) (int64, GCI_ERROR) {
 	return int64(row_count), err
 }
 
-/*
-현재는 prototyping만 해 놓자,,,
-void *타입에 대한 처리를 어떻게 할지 고민이 필요,,,
-*/
 func gci_bind_param_int(req_handle int, index int, value interface{}, flag int) int {
 	var handle C.int = C.int(req_handle)
 	var res C.int
 
 	c_param := C.int(value.(int64))
-	res = C.cci_bind_param(handle, C.int(index), C.CCI_A_TYPE_INT, unsafe.Pointer(&c_param), C.CCI_U_TYPE_INT, C.char(flag))
-	
+	res = C.cci_bind_param(handle, C.int(index), C.CCI_A_TYPE_INT, 
+				unsafe.Pointer(&c_param), C.CCI_U_TYPE_INT, C.char(flag))
+
 	return int(res)
 }
 
@@ -199,7 +202,8 @@ func gci_bind_param_string(req_handle int, index int, value interface{}, flag in
 	var res C.int
 
 	ss := fmt.Sprint(value)
-	res = C.cci_bind_param(handle, C.int(index), C.CCI_A_TYPE_STR, unsafe.Pointer(C.CString(ss)), C.CCI_U_TYPE_STRING, C.char(flag))
+	res = C.cci_bind_param(handle, C.int(index), C.CCI_A_TYPE_STR, 
+				unsafe.Pointer(C.CString(ss)), C.CCI_U_TYPE_STRING, C.char(flag))
 
 	return int(res)
 }
@@ -209,54 +213,49 @@ func gci_bind_param_float(req_handle int, index int, value interface{}, flag int
 	var res C.int
 
 	c_param := C.float(value.(float64))
-	res = C.cci_bind_param(handle, C.int(index), C.CCI_A_TYPE_FLOAT, unsafe.Pointer(&c_param), C.CCI_U_TYPE_FLOAT, C.char(flag))
+	res = C.cci_bind_param(handle, C.int(index), C.CCI_A_TYPE_FLOAT, 
+				unsafe.Pointer(&c_param), C.CCI_U_TYPE_FLOAT, C.char(flag))
 
 	return int(res)
 }
 
-func gci_get_result_info(req_handle int) (*GCI_COL_INFO, GCI_CUBRID_STMT, int) {
+func gci_get_result_info(req_handle int) ([]GCI_COL_INFO, GCI_CUBRID_STMT, int) {
 	var handle C.int = C.int(req_handle)
-	var col_info *C.T_CCI_COL_INFO
+	var c_col_info *C.T_CCI_COL_INFO
+	var go_col_info []C.T_CCI_COL_INFO
 	var cubrid_stmt C.T_CCI_CUBRID_STMT
 	var col_count C.int
-	var gci_col_info *GCI_COL_INFO
+	var gci_col_info []GCI_COL_INFO
 	var gci_cubrid_stmt GCI_CUBRID_STMT
 
-	col_info = C.cci_get_result_info(handle, &cubrid_stmt, &col_count)
+	c_col_info = C.cci_get_result_info(handle, &cubrid_stmt, &col_count)
 	gci_cubrid_stmt = GCI_CUBRID_STMT(cubrid_stmt)
 
-	gci_col_info = new(GCI_COL_INFO)
-	gci_col_info.u_type = GCI_U_TYPE(col_info._type)
-	gci_col_info.is_non_null = C.GoString(&col_info.is_non_null)
-	gci_col_info.scale = int16(col_info.scale)
-	gci_col_info.precision = int(col_info.precision)
+	sliceHeader := (*reflect.SliceHeader)((unsafe.Pointer(&go_col_info)))
+	sliceHeader.Cap = int(col_count)
+	sliceHeader.Len = int(col_count)
+	sliceHeader.Data = uintptr(unsafe.Pointer(c_col_info))
+	gci_col_info = make([]GCI_COL_INFO, int(col_count))
+	for i := 0; i < int(col_count); i++ {
+		gci_col_info[i].u_type = GCI_U_TYPE(go_col_info[C.int(i)]._type)
+		gci_col_info[i].is_non_null = C.GoString(&go_col_info[C.int(i)].is_non_null)
+		gci_col_info[i].scale = int16(go_col_info[C.int(i)].scale)
+		gci_col_info[i].precision = int(go_col_info[C.int(i)].precision)
+	}
 
 	return gci_col_info, gci_cubrid_stmt, int(col_count)
 }
 
-func gci_get_result_info_name(col_info *GCI_COL_INFO, idx int) string {
-	var c_name *C.char
+func gci_get_result_info_name(col_info []GCI_COL_INFO, idx int) string {
 	var result string
-	
-	// todo : GCI_COL_INFO -> T_CCI_COL_INFO
-	var cci_col_info *C.T_CCI_COL_INFO
-	cci_col_info = col_info.To()
-	c_name = C.ex_cci_get_result_info_name(cci_col_info, C.int(idx))
-	result = C.GoString(c_name)
+	result = col_info[idx - 1].col_name
 	return result
 }
 
-func gci_get_result_info_type(col_info *GCI_COL_INFO, idx int) GCI_U_TYPE {
+func gci_get_result_info_type(col_info []GCI_COL_INFO, idx int) GCI_U_TYPE {
 	var result GCI_U_TYPE
-	var cci_u_type C.T_CCI_U_TYPE
-	
-	var cci_col_info *C.T_CCI_COL_INFO
-	cci_col_info = col_info.To()
-	cci_u_type = C.ex_cci_get_result_info_type(cci_col_info, C.int(idx))
-
-	result = (GCI_U_TYPE)(cci_u_type)
+	result = col_info[idx - 1].u_type
 	return result
-
 }
 
 func gci_cursor(req_handle int, offset int, origin GCI_CURSOR_POS) (int, GCI_ERROR) {
@@ -285,7 +284,6 @@ func gci_fetch(req_handle int) (int, GCI_ERROR) {
 	var err GCI_ERROR
 
 	res = C.cci_fetch(handle, &cci_error)
-	
 	if res < C.int(0) {
 		err.Err_code = int(cci_error.err_code)
 		err.Err_msg = C.GoString(&cci_error.err_msg[0])
@@ -303,7 +301,6 @@ func gci_get_data_string(req_handle int, idx int) (int, string, int) {
 	var data string
 
 	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_STR, unsafe.Pointer(&buf), &indicator)
-	
 	data = C.GoString(buf)
 
 	return int(res), data, int(indicator)
@@ -330,7 +327,7 @@ func gci_get_data_float(req_handle int, idx int) (int, float64, int) {
 	var res C.int
 	var indicator C.int
 	var data float64
-	
+
 	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_FLOAT, unsafe.Pointer(&buf), &indicator)
 	data = float64(buf)
 
@@ -361,13 +358,13 @@ func gci_get_data_bit(req_handle int, idx int) (int, GCI_BIT, int) {
 
 	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_BIT, unsafe.Pointer(&buf), &indicator)
 	data.size = int(buf.size)
-	//data.buf = make([]byte, data.size)
 	data.buf = C.GoBytes(unsafe.Pointer(buf.buf), buf.size)
 
 	return int(res), data, int(indicator)
 }
 
 func gci_get_data_date(req_handle int, idx int) (int, GCI_DATE, int) {
+	log.Println("gci_get_data_date_start")
 	var handle C.int = C.int(req_handle)
 	var c_idx = C.int(idx)
 	var buf C.T_CCI_DATE
@@ -375,7 +372,8 @@ func gci_get_data_date(req_handle int, idx int) (int, GCI_DATE, int) {
 	var indicator C.int
 	var data GCI_DATE
 
-	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_DATE, unsafe.Pointer(&buf), &indicator)
+	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_DATE, 
+				unsafe.Pointer(&buf), &indicator)
 	data.yr = int(buf.yr)
 	data.mon = int(buf.mon)
 	data.day = int(buf.day)
@@ -383,7 +381,8 @@ func gci_get_data_date(req_handle int, idx int) (int, GCI_DATE, int) {
 	data.mm = int(buf.mm)
 	data.ss = int(buf.ss)
 	data.ms = int(buf.ms)
-
+	
+	log.Println("gci_get_data_date_end")
 	return int(res), data, int(indicator)
 }
 
@@ -395,7 +394,8 @@ func gci_get_data_bigint(req_handle int, idx int) (int, int64, int) {
 	var indicator C.int
 	var data int64
 
-	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_BIGINT, unsafe.Pointer(&buf), &indicator)
+	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_BIGINT, 
+				unsafe.Pointer(&buf), &indicator)
 	data = int64(buf)
 
 	return int(res), data, int(indicator)
@@ -409,15 +409,17 @@ func gci_get_data_blob(req_handle int, idx int) (int, GCI_BLOB, int) {
 	var indicator C.int
 	var data GCI_BLOB
 
-	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_BLOB, unsafe.Pointer(&buf), &indicator)
+	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_BLOB, 
+				unsafe.Pointer(&buf), &indicator)
 	data = GCI_BLOB(buf)
-	
+
 	return int(res), data, int(indicator)
 }
 
 func gci_blob_size(blob GCI_BLOB) int64 {
 	var size C.longlong
 	var data C.T_CCI_BLOB = C.T_CCI_BLOB(blob)
+
 	size = C.cci_blob_size(data)
 
 	return int64(size)
@@ -445,10 +447,10 @@ func gci_blob_read(con_handle int, blob GCI_BLOB, start_pos int64, length int64)
 	res_blob = GCI_BLOB(c_buf)
 
 
-	return res_blob, err 
+	return res_blob, err
 }
 
 func gci_blob_free(blob GCI_BLOB) {
-	var data C.T_CCI_BLOB = C.T_CCI_BLOB(blob) 
+	var data C.T_CCI_BLOB = C.T_CCI_BLOB(blob)
 	C.cci_blob_free(data)
 }

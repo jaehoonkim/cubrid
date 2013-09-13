@@ -17,7 +17,7 @@ func openDb(t *testing.T, dsn string) *sql.DB {
 /*
 func TestCubrid(t *testing.T) {
 	fmt.Println("TestCubrid")
-	db, err := sql.Open("cubrid", "localhost/33000/demodb/dba/1212123")
+	db, err := sql.Open("cubrid", "127.0.0.1/33000/demodb/dba/")
 	if err != nil {
 		t.Fatal(err)
 	} 
@@ -51,9 +51,10 @@ func TestStmtQuery(t *testing.T) {
 	//}
 	
 	for rows.Next() == true {
+		log.Println("test...0")
 		var s_name, f_name string
 		rows.Scan(&s_name, &f_name)
-
+		log.Println("test...1")
 		fmt.Printf("s : %s, f : %s\n", s_name, f_name)
 	}
 }
@@ -94,7 +95,7 @@ func TestStmtQueryParam(t *testing.T) {
 
 	fmt.Printf("s : %s, f : %s\n", s_name, f_name)
 }
-*/
+//*/
 /*
 func TestStmtQueryBind_int(t *testing.T) {
 	db, err := sql.Open("cubrid", "127.0.0.1/33000/demodb/dba/")
@@ -164,7 +165,8 @@ func TestStmtQueryBind_date(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var game_date CCI_DATE
+	log.Println("scan..before")
+	var game_date GCI_DATE
 	var host_year, event_code, athlete_code, stadium_code, nation_code, medal string
 	rows.Scan(&host_year, &event_code, &athlete_code, &stadium_code, &nation_code, &medal, &game_date)
 	
@@ -283,7 +285,7 @@ func TestStmtQueryBind_clob(t *testing.T) {
 	fmt.Printf("idx : %d, %s\n", idx, clob.Buf())
 }
 //*/
-
+/*
 func TestStmtQueryBind_blob(t *testing.T) {
 	db := openDb(t, "127.0.0.1/33000/testdb/dba/1234")
 	defer db.Close()
@@ -311,4 +313,4 @@ func TestStmtQueryBind_blob(t *testing.T) {
 	rows.Scan(&idx, &blob)
 	fmt.Printf("idx : %d, buf : %x\n", idx, blob.Buf())
 }
-
+*/

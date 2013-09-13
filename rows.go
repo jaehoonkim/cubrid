@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"io"
+	"log"
 )
 
 type cubridRows struct {
@@ -11,8 +12,8 @@ type cubridRows struct {
 }
 
 func (rows *cubridRows) Columns() []string {
-	//log.Println("cubridRow:Columns")
-	var col_info *GCI_COL_INFO
+	log.Println("cubridRow:Columns")
+	var col_info []GCI_COL_INFO
 	//var stmt_type GCI_CUBRID_STMT
 	var col_count int
 	var idx int
@@ -21,10 +22,13 @@ func (rows *cubridRows) Columns() []string {
 	if col_info == nil {
 		return nil
 	}
-
+	
+	//log.Println("cubridRows::test...0")
 	col_name  := make([]string, int(col_count))
 	for idx = 1; idx <= col_count; idx++ {
-		col_name[idx] = gci_get_result_info_name(col_info, idx)
+		//log.Println("cubridRows::test...1")
+		col_name[idx - 1] = gci_get_result_info_name(col_info, idx)
+		//log.Println("cubridRows::test...2")
 	}
 	return col_name
 }
@@ -41,10 +45,11 @@ func (rows *cubridRows) Close() error {
 func (rows *cubridRows) Next(dest []driver.Value) error {
 	var res int
 	var err GCI_ERROR
-	var col_info *GCI_COL_INFO
+	var col_info []GCI_COL_INFO
 	//var stmt_type GCI_CUBRID_STMT
 	var col_count int
 
+	log.Println("##### rows::Next #####")
 	res, err = gci_cursor(rows.s.req, 1, GCI_CURSOR_CURRENT)
 	if res == int(GCI_ER_NO_MORE_DATA) {
 		return io.EOF
