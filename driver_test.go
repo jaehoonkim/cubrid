@@ -206,11 +206,11 @@ func TestStmtQueryBind_bit(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var buf CCI_BIT
+	var buf GCI_BIT
 	var idx int
 
 	rows.Scan(&idx,&buf)
-	fmt.Printf("idx : %d, size:%d, buf: %s\n", idx, buf.Size(), buf.Buf())
+	fmt.Printf("idx : %d, size:%d, buf: %x\n", idx, buf.Size(), buf.Buf())
 }
 //*/
 /*
@@ -219,7 +219,7 @@ func TestStmtQueryBind_bit(t *testing.T) {
 	idx : integer
 	setn : SET
 */
-/*
+///*
 func TestStmtQueryBind_set(t *testing.T) {
 	db := openDb(t, "127.0.0.1/33000/testdb/dba/1234")
 	defer db.Close()
@@ -244,7 +244,7 @@ func TestStmtQueryBind_set(t *testing.T) {
 
 	//var buf CCI_SET
 	var idx int
-	var set CCI_SET
+	var set GCI_SET
 	rows.Scan(&idx, &set)
 	if set.Size() > 0 {
 		fmt.Printf("idx : %d, %s, %s, %s\n", idx, set.Buf(0), set.Buf(1), set.Buf(2))

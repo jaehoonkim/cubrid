@@ -1,9 +1,5 @@
 package cubrid
 
-/*
-#include "cas_cci.h"
-*/
-import "C"
 import "unsafe"
 //import "log"
 
@@ -107,7 +103,7 @@ const (
 	U_TYPE_FIRST GCI_U_TYPE = 0
 	U_TYPE_UNKNOWN GCI_U_TYPE = 0
 	U_TYPE_NULL GCI_U_TYPE = 0
-	
+
 	U_TYPE_CHAR GCI_U_TYPE = 1
 	U_TYPE_STRING GCI_U_TYPE = 2
 	U_TYPE_NCHAR GCI_U_TYPE = 3
@@ -239,21 +235,12 @@ type GCI_BIT struct {
 	buf []byte
 }
 
-type CCI_SET struct {
-	//size C.int
+type GCI_SET struct {
 	size int
 	buf []string
 }
 
-type CCI_BLOB struct {
-	_BLOB []byte
-}
-
 type GCI_BLOB unsafe.Pointer 
-
-type CCI_CLOB struct {
-	_CLOB string
-}
 
 type GCI_CLOB unsafe.Pointer
 
@@ -292,41 +279,24 @@ func (bit *GCI_BIT) Size() int {
 }
 
 func (bit *GCI_BIT) Buf() string {
-	//return C.GoStringN(bit.buf, bit.size)
 	return string(bit.buf)
 }
 
 /**************************************/
-func (set *CCI_SET) Buf(idx int) string {
+func (set *GCI_SET) Buf(idx int) string {
 	return set.buf[idx]
 }
 
-func (set *CCI_SET) Size() int {
+func (set *GCI_SET) Size() int {
 	return set.size
 }
 
-func (set *CCI_SET) MakeBuf(size int) {
+func (set *GCI_SET) MakeBuf(size int) {
 	set.size = size
 	set.buf = make([]string, size)
 }
 
-func (set *CCI_SET) SetBuf(idx int, buf string) {
+func (set *GCI_SET) SetBuf(idx int, buf string) {
 	set.buf[idx] = buf
 }
 
-/*************************************/
-func (blob *CCI_BLOB) Buf() []byte {
-	//log.Printf("type:%x", blob._BLOB)
-	return blob._BLOB
-}
-
-/*************************************/
-func (clob *CCI_CLOB) Buf() string {
-	//log.Printf("type:%s", clob._CLOB)
-	return clob._CLOB
-}
-/*
-func (clob *CCI_CLOB) getBytes() []byte {
-	return ([]byte)(unsafe.Pointer(clob._CLOB))
-}
-*/
