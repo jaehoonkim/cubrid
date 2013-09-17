@@ -1,7 +1,6 @@
 package cubrid
 
 import "unsafe"
-//import "log"
 
 type AUTOCOMMIT_MODE int
 const (
@@ -12,6 +11,13 @@ const (
 const (
 	TRAN_COMMIT = 1
 	TRAN_ROLLBACK = 2
+)
+
+const (
+	GCI_CODE_SET = 0x20
+	GCI_CODE_MULTISET = 0x40
+	GCI_CODE_SEQUENCE = 0x60
+	GCI_CODE_COLLECTION = 0x60
 )
 
 type GCI_A_TYPE int
@@ -235,16 +241,12 @@ type GCI_BIT struct {
 	buf []byte
 }
 
-type GCI_SET struct {
-	size int
-	buf []string
-}
+type GCI_SET unsafe.Pointer
 
-type GCI_BLOB unsafe.Pointer 
+type GCI_BLOB unsafe.Pointer
 
 type GCI_CLOB unsafe.Pointer
 
-/*-----------------------------------------------*/
 func (date *GCI_DATE) Yr() uint {
 	return uint(date.yr)
 }
@@ -273,7 +275,6 @@ func (date *GCI_DATE) Ms() uint {
 	return uint(date.ms)
 }
 
-/**************************************/
 func (bit *GCI_BIT) Size() int {
 	return int(bit.size)
 }
@@ -282,21 +283,5 @@ func (bit *GCI_BIT) Buf() string {
 	return string(bit.buf)
 }
 
-/**************************************/
-func (set *GCI_SET) Buf(idx int) string {
-	return set.buf[idx]
-}
 
-func (set *GCI_SET) Size() int {
-	return set.size
-}
-
-func (set *GCI_SET) MakeBuf(size int) {
-	set.size = size
-	set.buf = make([]string, size)
-}
-
-func (set *GCI_SET) SetBuf(idx int, buf string) {
-	set.buf[idx] = buf
-}
 

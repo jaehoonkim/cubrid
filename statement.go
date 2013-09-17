@@ -13,8 +13,7 @@ type cubridStmt struct {
 }
 
 func (s *cubridStmt) Close() error {
-	//log.Println("cubridStmt:Close")
-	err := gci_close_req_handle(s.req)
+	err := Gci_close_req_handle(s.req)
 	if err == 0 {
 		return nil
 	}
@@ -22,17 +21,14 @@ func (s *cubridStmt) Close() error {
 }
 
 func (s *cubridStmt) NumInput() int {
-	//log.Println("cubridStmt:NumInput")
-	param_cnt := gci_get_bind_num(s.req)
+	param_cnt := Gci_get_bind_num(s.req)
 	if param_cnt < 0 {
 		fmt.Errorf("cci_get_bind_num err : %d", param_cnt)
 	}
-	//log.Printf("numInput:%d\n", int(param_cnt))
 	return param_cnt
 }
 
 func (s *cubridStmt) Exec(args []driver.Value) (driver.Result, error) {
-	//log.Println("cubridStmt:Exec")
 	err := s.execute(args)
 	if err != nil {
 		return nil, err
@@ -42,7 +38,6 @@ func (s *cubridStmt) Exec(args []driver.Value) (driver.Result, error) {
 }
 
 func (s *cubridStmt) Query(args []driver.Value) (driver.Rows, error) {
-	//log.Println("cubridStmt : Query")
 	err := s.execute(args)
 	if err != nil {
 		return nil, err
@@ -52,7 +47,6 @@ func (s *cubridStmt) Query(args []driver.Value) (driver.Rows, error) {
 }
 
 func (s *cubridStmt) execute(args []driver.Value) (error) {
-	//log.Println("cubridStmt:execute")
 	var gciError GCI_ERROR
 	if args != nil {
 		err := s.bindParam(args)
@@ -60,7 +54,7 @@ func (s *cubridStmt) execute(args []driver.Value) (error) {
 			return err
 		}
 	}
-	_, gciError = gci_execute(s.req, 0, 0)
+	_, gciError = Gci_execute(s.req, 0, 0)
 	if gciError.Err_code < 0 {
 		return fmt.Errorf("cci_execute err: %d, %s", gciError.Err_code, gciError.Err_msg)
 	}
@@ -75,24 +69,23 @@ func (s *cubridStmt) execute(args []driver.Value) (error) {
   이후, cci_execute()가 호출될 때 저장된 데이터가 서버로 전송된다.:
 */
 func (s *cubridStmt) bindParam(args []driver.Value) error {
-	//log.Println("cbubridStmt:bindParam")
 	var res int
 	for i, arg := range args {
 		switch arg.(type) {
 		case int64:
-			res = gci_bind_param_int(s.req, i + 1, arg, GCI_BIND_PTR)
+			res = Gci_bind_param_int(s.req, i + 1, arg, GCI_BIND_PTR)
 			if res < 0 {
 				return fmt.Errorf("cci_bind_param : %d", res)
 			}
 		case string:
-			res = gci_bind_param_string(s.req, i + 1, arg, GCI_BIND_PTR)
+			res = Gci_bind_param_string(s.req, i + 1, arg, GCI_BIND_PTR)
 			if res < 0 {
 				return fmt.Errorf("cci_bind_param : %d", res)
 			}
 		case time.Time:
 			log.Println("statement:bindParam:time.Tile")
 		case float64:
-			res = gci_bind_param_float(s.req, i + 1, arg, GCI_BIND_PTR)
+			res = Gci_bind_param_float(s.req, i + 1, arg, GCI_BIND_PTR)
 			if res < 0 {
 				return fmt.Errorf("cci_bind_param : %d", res)
 			}

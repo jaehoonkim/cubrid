@@ -219,14 +219,14 @@ func TestStmtQueryBind_bit(t *testing.T) {
 	idx : integer
 	setn : SET
 */
-///*
+/*
 func TestStmtQueryBind_set(t *testing.T) {
 	db := openDb(t, "127.0.0.1/33000/testdb/dba/1234")
 	defer db.Close()
 	if db.Driver() == nil {
 		t.Fatal(fmt.Errorf("nil driver"))
 	}
-	stmt, err := db.Prepare("select * from tbl_set")
+	stmt, err := db.Prepare("select * from set_tbl")
 
 	defer stmt.Close()
 	if err != nil {
@@ -246,14 +246,19 @@ func TestStmtQueryBind_set(t *testing.T) {
 	var idx int
 	var set GCI_SET
 	rows.Scan(&idx, &set)
+	
+	size := Gci_set_size(set)
+	d := make([]string, size)
+	Gci_set_get(set, 0, A_TYPE_STR)
 	if set.Size() > 0 {
 		fmt.Printf("idx : %d, %s, %s, %s\n", idx, set.Buf(0), set.Buf(1), set.Buf(2))
 	}
 
+	/*
 	rows.Next()
 	rows.Scan(&idx, &set)
 	fmt.Printf("idx : %d, %s, %s, %s\n", idx, set.Buf(0), set.Buf(1), set.Buf(2))
-
+*/
 }
 //*/
 /*

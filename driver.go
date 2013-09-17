@@ -23,7 +23,7 @@ func (d *cubridDriver) Open(name string) (driver.Conn, error) {
 		return nil, fmt.Errorf("error options : %d", len(opt))
 	}
 	port, _ := strconv.Atoi(opt[1])
-	con := gci_connect(opt[0], port, opt[2], opt[3], opt[4])
+	con := Gci_connect(opt[0], port, opt[2], opt[3], opt[4])
 
 	if con < 0 {
 		fmt.Printf("connect error code : %d", con)

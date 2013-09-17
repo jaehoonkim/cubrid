@@ -3,7 +3,6 @@ package cubrid
 import (
 	"database/sql/driver"
 	"fmt"
-	"log"
 )
 
 type cubridConn struct {
@@ -15,7 +14,7 @@ func (c *cubridConn) Prepare(query string) (driver.Stmt, error) {
 	var req int
 	var cci_error GCI_ERROR
 	stmt := &cubridStmt { c: c }
-	req, cci_error = gci_prepare(c.con, query, 0)
+	req, cci_error = Gci_prepare(c.con, query, 0)
 	if req  < 0 {
 		c.Close()
 		return nil, fmt.Errorf("error : %d, %s", cci_error.Err_code, cci_error.Err_msg)
@@ -25,10 +24,9 @@ func (c *cubridConn) Prepare(query string) (driver.Stmt, error) {
 }
 
 func (c *cubridConn) Close() error {
-	//log.Println("cubridConn:Close")
 	var err GCI_ERROR
 	var err_no int
-	err_no, err = gci_disconnect(c.con)
+	err_no, err = Gci_disconnect(c.con)
 	if err_no < 0 {
 		return fmt.Errorf("error: %d, %s", err.Err_code, err.Err_msg)
 	}
@@ -40,9 +38,8 @@ func (c *cubridConn) Close() error {
 	이를 off하면 transaction을 사용하는걸로,,
 */
 func (c *cubridConn) Begin() (driver.Tx, error) {
-	//log.Println("cubridConn:Begin")
 	var err int
-	err = gci_set_autocommit(c.con, AUTOCOMMIT_FALSE)
+	err = Gci_set_autocommit(c.con, AUTOCOMMIT_FALSE)
 	if err == 0 {
 		tx := &cubridTx{ c: c }
 		return tx, nil
@@ -51,7 +48,6 @@ func (c *cubridConn) Begin() (driver.Tx, error) {
 }
 
 func (c *cubridConn) Exec(query string, args []driver.Value) (driver.Result, error) {
-	log.Println("cubridConn:Exec")
 	stmt, err := c.Prepare(query)
 	defer stmt.Close()
 	if err != nil {
@@ -65,7 +61,6 @@ func (c *cubridConn) Exec(query string, args []driver.Value) (driver.Result, err
 }
 
 func (c *cubridConn) Query(query string, args []driver.Value) (driver.Rows, error) {
-	log.Println("cubridConn:Query")
 	stmt, err := c.Prepare(query)
 	defer stmt.Close()
 	if err != nil {
@@ -79,3 +74,4 @@ func (c *cubridConn) Query(query string, args []driver.Value) (driver.Rows, erro
 	
 	return rows, nil
 }
+
