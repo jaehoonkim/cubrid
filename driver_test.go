@@ -254,11 +254,11 @@ func TestStmtQueryBind_set(t *testing.T) {
 		fmt.Printf("idx : %d, %s, %s, %s\n", idx, set.Buf(0), set.Buf(1), set.Buf(2))
 	}
 
-	/*
+	
 	rows.Next()
 	rows.Scan(&idx, &set)
 	fmt.Printf("idx : %d, %s, %s, %s\n", idx, set.Buf(0), set.Buf(1), set.Buf(2))
-*/
+
 }
 //*/
 /*
