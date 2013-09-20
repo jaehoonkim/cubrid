@@ -219,14 +219,14 @@ func TestStmtQueryBind_bit(t *testing.T) {
 	idx : integer
 	setn : SET
 */
-/*
+///*
 func TestStmtQueryBind_set(t *testing.T) {
 	db := openDb(t, "127.0.0.1/33000/testdb/dba/1234")
 	defer db.Close()
 	if db.Driver() == nil {
 		t.Fatal(fmt.Errorf("nil driver"))
 	}
-	stmt, err := db.Prepare("select * from set_tbl")
+	stmt, err := db.Prepare("select * from tbl_set")
 
 	defer stmt.Close()
 	if err != nil {
@@ -248,16 +248,71 @@ func TestStmtQueryBind_set(t *testing.T) {
 	rows.Scan(&idx, &set)
 	
 	size := Gci_set_size(set)
+	fmt.Println(size)
+	//Gci_set_free(set)
 	d := make([]string, size)
-	Gci_set_get(set, 0, A_TYPE_STR)
-	if set.Size() > 0 {
-		fmt.Printf("idx : %d, %s, %s, %s\n", idx, set.Buf(0), set.Buf(1), set.Buf(2))
+	var res int
+	var ind int
+	var x interface{}
+	res, x, ind = Gci_set_get(set, 1, A_TYPE_STR)
+	d[0] = x.(string)
+	fmt.Println(res, d[0], ind)
+
+	res, x, ind = Gci_set_get(set, 2, A_TYPE_STR)
+	d[1] = x.(string)
+	fmt.Println(res, d[1], ind)
+
+	res, x, ind = Gci_set_get(set, 3, A_TYPE_STR)
+	d[2] = x.(string)
+	fmt.Println(res, d[2], ind)
+
+	Gci_set_free(set)
+
+
+///////////////////////////////////////
+	if rows.Next() == false {
+		t.Fatal(err)
 	}
 
+	//var buf CCI_SET
+	var idx2 int
+	var set2 GCI_SET
+	rows.Scan(&idx2, &set2)
 	
-	rows.Next()
-	rows.Scan(&idx, &set)
-	fmt.Printf("idx : %d, %s, %s, %s\n", idx, set.Buf(0), set.Buf(1), set.Buf(2))
+	size2 := Gci_set_size(set2)
+	fmt.Println(size2)
+	//Gci_set_free(set)
+	dn := make([]int, size2)
+	var res2 int
+	var ind2 int
+	var x2 interface{}
+	res2, x2, ind2 = Gci_set_get(set2, 1, A_TYPE_INT)
+	dn[0] = x2.(int)
+	fmt.Println(res2, dn[0], ind2)
+
+	res2, x2, ind2 = Gci_set_get(set2, 2, A_TYPE_INT)
+	dn[1] = x2.(int)
+	fmt.Println(res2, dn[1], ind2)
+
+	res2, x2, ind2 = Gci_set_get(set2, 3, A_TYPE_INT)
+	dn[2] = x2.(int)
+	fmt.Println(res2, dn[2], ind2)
+
+	Gci_set_free(set2)
+
+
+
+
+
+
+	//if set.Size() > 0 {
+	//	fmt.Printf("idx : %d, %s, %s, %s\n", idx, set.Buf(0), set.Buf(1), set.Buf(2))
+	//}
+
+	
+	//rows.Next()
+	//rows.Scan(&idx, &set)
+	//fmt.Printf("idx : %d, %s, %s, %s\n", idx, set.Buf(0), set.Buf(1), set.Buf(2))
 
 }
 //*/

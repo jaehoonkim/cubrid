@@ -23,7 +23,7 @@ const (
 type GCI_A_TYPE int
 const (
 	_ = iota
-	A_TYPE_STR GCI_A_TYPE = iota + 1
+	A_TYPE_STR GCI_A_TYPE = iota
 	A_TYPE_INT
 	A_TYPE_FLOAT
 	A_TYPE_DOUBLE

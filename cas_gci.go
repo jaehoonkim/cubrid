@@ -403,17 +403,66 @@ func Gci_set_size(set GCI_SET) int {
 	set 버퍼 안에서의 index와 a_type
 	ex) {'a', 'b', 'c'}
 */
-func Gci_set_get(set GCI_SET, index int, a_type GCI_A_TYPE) (int, unsafe.Pointer, int) {
+func Gci_set_get(set GCI_SET, index int, a_type GCI_A_TYPE) (int, interface{}, int) {
+	var indicator int
+	var res int
+	var data interface{}
+
+	switch a_type {
+	case A_TYPE_STR:
+		res, data, indicator = gci_set_get_str(set, index)
+	case A_TYPE_INT:
+		res, data, indicator = gci_set_get_int(set, index)
+	/*case A_TYPE_FLOAT:
+	case A_TYPE_DOUBLE:
+	case A_TYPE_BIT:
+	case A_TYPE_DATE:
+	case A_TYPE_SET:
+	case A_TYPE_BIGINT:
+	case A_TYPE_BLOB:
+	case A_TYPE_CLOB:
+	*/
+	}
+
+	return res, data, indicator
+}
+
+func gci_set_get_str(set GCI_SET, index int) (int, interface{}, int) {
 	var data C.T_CCI_SET = C.T_CCI_SET(set)
-	var c_a_type C.T_CCI_A_TYPE = C.T_CCI_A_TYPE(a_type)
-	var value *C.void
+	var value *C.char
 	var indicator C.int
 	var res C.int
 
-	res = C.cci_set_get(data, C.int(index), c_a_type, unsafe.Pointer(&value), &indicator)
+	res = C.cci_set_get(data, C.int(index), C.CCI_A_TYPE_STR, unsafe.Pointer(&value), &indicator)
 
-	return int(res), unsafe.Pointer(value), int(indicator)
+	rv := C.GoString(value)
+	return int(res), rv, int(indicator)
 }
+
+func gci_set_get_int(set GCI_SET, index int) (int, interface{}, int) {
+	var data C.T_CCI_SET = C.T_CCI_SET(set)
+	var value C.int
+	var indicator C.int
+	var res C.int
+
+	res = C.cci_set_get(data, C.int(index), C.CCI_A_TYPE_INT, unsafe.Pointer(&value), &indicator)
+
+	rv := int(value)
+	return int(res), rv, int(indicator)
+}
+
+func gci_set_get_float(set GCI_SET, index int) (int, interface{}, int) {
+	var data C.T_CCI_SET = C.T_CCI_SET(set)
+	var value C.float
+	var indicator C.int
+	var res C.int
+
+	res = C.cci_set_get(data, C.int(index), C.CCI_A_TYPE_FLOAT, unsafe.Pointer(&value), &indicator)
+
+	rv := float64(value)
+	return int(res), rv, int(indicator)
+}
+
 
 func Gci_set_free(set GCI_SET) {
 	var data C.T_CCI_SET = C.T_CCI_SET(set)
