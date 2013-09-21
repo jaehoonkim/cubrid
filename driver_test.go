@@ -219,7 +219,7 @@ func TestStmtQueryBind_bit(t *testing.T) {
 	idx : integer
 	setn : SET
 */
-///*
+/*
 func TestStmtQueryBind_set(t *testing.T) {
 	db := openDb(t, "127.0.0.1/33000/testdb/dba/1234")
 	defer db.Close()
@@ -297,7 +297,7 @@ func TestStmtQueryBind_set(t *testing.T) {
 	res2, x2, ind2 = Gci_set_get(set2, 3, A_TYPE_INT)
 	dn[2] = x2.(int)
 	fmt.Println(res2, dn[2], ind2)
-
+	
 	Gci_set_free(set2)
 
 
