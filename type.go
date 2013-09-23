@@ -143,8 +143,8 @@ const (
 
 const GCI_BIND_PTR int = 1
 type GCI_ERROR struct {
-	Err_code int
-	Err_msg string
+	Code int
+	Msg string
 }
 
 type GCI_COL_INFO struct {

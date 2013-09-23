@@ -374,3 +374,25 @@ func TestStmtQueryBind_blob(t *testing.T) {
 	fmt.Printf("idx : %d, buf : %x\n", idx, blob.Buf())
 }
 */
+
+func TestInsData(t *testing.T) {
+	db := openDb(t, "127.0.0.1/33000/testdb/dba/1234")
+	defer db.Close()
+	if db.Driver() == nil {
+		t.Fatal(fmt.Errorf("nil driver"))
+	}
+	stmt, err := db.Prepare("insert into tbl_ins (idx) values (?)")
+	defer stmt.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := stmt.Exec(1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Println(result.RowsAffected())
+	log.Println("test")
+
+}

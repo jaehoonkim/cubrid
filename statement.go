@@ -55,8 +55,8 @@ func (s *cubridStmt) execute(args []driver.Value) (error) {
 		}
 	}
 	_, gciError = Gci_execute(s.req, 0, 0)
-	if gciError.Err_code < 0 {
-		return fmt.Errorf("cci_execute err: %d, %s", gciError.Err_code, gciError.Err_msg)
+	if gciError.Code < 0 {
+		return fmt.Errorf("cci_execute err: %d, %s", gciError.Code, gciError.Msg)
 	}
 
 	return nil

@@ -76,8 +76,8 @@ func Gci_prepare(conn_handle int, sql_stmt string, flag byte) (int, GCI_ERROR) {
 	defer C.free(unsafe.Pointer(cQuery))
 
 	req = C.cci_prepare(cHandle, cQuery, 0, &cci_error)
-	err.Err_code = int(cci_error.err_code)
-	err.Err_msg = C.GoString(&cci_error.err_msg[0])
+	err.Code = int(cci_error.err_code)
+	err.Msg = C.GoString(&cci_error.err_msg[0])
 
 	return int(req), err
 }
@@ -89,8 +89,8 @@ func Gci_disconnect(conn_handle int) (int, GCI_ERROR) {
 	var err GCI_ERROR
 
 	res = C.cci_disconnect(cHandle, &cci_error)
-	err.Err_code = int(cci_error.err_code)
-	err.Err_msg = C.GoString(&cci_error.err_msg[0])
+	err.Code = int(cci_error.err_code)
+	err.Msg = C.GoString(&cci_error.err_msg[0])
 
 	return int(res), err
 }
@@ -120,8 +120,8 @@ func Gci_execute(req_handle int, flag int, max_col_size int) (int, GCI_ERROR) {
 	var err GCI_ERROR
 
 	res = C.cci_execute(handle, C.char(flag), C.int(max_col_size), &cci_error)
-	err.Err_code = int(cci_error.err_code)
-	err.Err_msg = C.GoString(&cci_error.err_msg[0])
+	err.Code = int(cci_error.err_code)
+	err.Msg = C.GoString(&cci_error.err_msg[0])
 
 	return int(res), err
 }
@@ -143,8 +143,8 @@ func Gci_end_tran(conn_handle int, tran_type int) (int, GCI_ERROR) {
 	var err GCI_ERROR
 
 	res = C.cci_end_tran(handle, C.char(tran_type), &cci_error)
-	err.Err_code = int(cci_error.err_code)
-	err.Err_msg = C.GoString(&cci_error.err_msg[0])
+	err.Code = int(cci_error.err_code)
+	err.Msg = C.GoString(&cci_error.err_msg[0])
 
 	return int(res), err
 }
@@ -158,8 +158,8 @@ func Gci_get_last_insert_id(conn_handle int) (int64, GCI_ERROR) {
 	var nid int64
 
 	res = C.cci_get_last_insert_id(handle, unsafe.Pointer(value), &cci_error)
-	err.Err_code = int(cci_error.err_code)
-	err.Err_msg = C.GoString(&cci_error.err_msg[0])
+	err.Code = int(cci_error.err_code)
+	err.Msg = C.GoString(&cci_error.err_msg[0])
 	if res < 0 {
 		return int64(res), err
 	}
@@ -179,8 +179,8 @@ func Gci_row_count(conn_handle int) (int64, GCI_ERROR) {
 
 	res = C.cci_row_count(handle, &row_count, &cci_error)
 	if res < 0 {
-		err.Err_code = int(cci_error.err_code)
-		err.Err_msg = C.GoString(&cci_error.err_msg[0])
+		err.Code = int(cci_error.err_code)
+		err.Msg = C.GoString(&cci_error.err_msg[0])
 	}
 
 	return int64(row_count), err
@@ -283,8 +283,8 @@ func Gci_cursor(req_handle int, offset int, origin GCI_CURSOR_POS) (int, GCI_ERR
 	c_origin = C.T_CCI_CURSOR_POS(origin)
 
 	res = C.cci_cursor(handle, c_offset, c_origin, &cci_error)
-	err.Err_code = int(cci_error.err_code)
-	err.Err_msg = C.GoString(&cci_error.err_msg[0])
+	err.Code = int(cci_error.err_code)
+	err.Msg = C.GoString(&cci_error.err_msg[0])
 
 	return int(res), err
 }
@@ -297,8 +297,8 @@ func Gci_fetch(req_handle int) (int, GCI_ERROR) {
 
 	res = C.cci_fetch(handle, &cci_error)
 	if res < C.int(0) {
-		err.Err_code = int(cci_error.err_code)
-		err.Err_msg = C.GoString(&cci_error.err_msg[0])
+		err.Code = int(cci_error.err_code)
+		err.Msg = C.GoString(&cci_error.err_msg[0])
 	}
 
 	return int(res), err
@@ -612,12 +612,11 @@ func Gci_blob_read(con_handle int, blob GCI_BLOB, start_pos int64, length int64)
 	defer C.free(unsafe.Pointer(c_buf))
 	res = C.cci_blob_read(handle, data, c_start_pos, c_length, c_buf, &cci_error)
 	if res < C.int(0) {
-		err.Err_code = int(cci_error.err_code)
-		err.Err_msg = C.GoString(&cci_error.err_msg[0])
+		err.Code = int(cci_error.err_code)
+		err.Msg = C.GoString(&cci_error.err_msg[0])
 	}
 
 	res_blob = GCI_BLOB(c_buf)
-
 
 	return res_blob, err
 }

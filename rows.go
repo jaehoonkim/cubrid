@@ -53,12 +53,12 @@ func (rows *cubridRows) Next(dest []driver.Value) error {
 		return io.EOF
 	}
 	if res < 0 {
-		return fmt.Errorf("cursor err: %d, %s", err.Err_code, err.Err_msg)
+		return fmt.Errorf("cursor err: %d, %s", err.Code, err.Msg)
 	}
 
 	res, err = Gci_fetch(rows.s.req)
 	if res < 0 {
-		return fmt.Errorf("fetch err: %d, %s", err.Err_code, err.Err_msg)
+		return fmt.Errorf("fetch err: %d, %s", err.Code, err.Msg)
 	}
 
 	col_info, _, col_count = Gci_get_result_info(rows.s.req)
