@@ -66,6 +66,33 @@ func Gci_connect(ip string, port int, db_name string, db_user string, db_passwor
 
 }
 
+func Gci_connect_with_url(url string, user string, password string) int {
+	serverUrl := C.CString(url)
+	serverUser := C.CString(user)
+	serverPassword := C.CString(password)
+
+	defer C.free(unsafe.Pointer(serverUrl))
+	defer C.free(unsafe.Pointer(serverUser))
+	defer C.free(unsafe.Pointer(serverPassword))
+
+	con := C.cci_connect_with_url(serverUrl, serverUser, serverPassword)
+
+	return int(con)
+}
+
+func Gci_disconnect(conn_handle int) (int, GCI_ERROR) {
+	var cHandle C.int = C.int(conn_handle)
+	var cci_error C.T_CCI_ERROR
+	var res C.int
+	var err GCI_ERROR
+
+	res = C.cci_disconnect(cHandle, &cci_error)
+	err.Code = int(cci_error.err_code)
+	err.Msg = C.GoString(&cci_error.err_msg[0])
+
+	return int(res), err
+}
+
 func Gci_prepare(conn_handle int, sql_stmt string, flag byte) (int, GCI_ERROR) {
 	var cHandle C.int = C.int(conn_handle)
 	var cQuery *C.char = C.CString(sql_stmt)
@@ -80,19 +107,6 @@ func Gci_prepare(conn_handle int, sql_stmt string, flag byte) (int, GCI_ERROR) {
 	err.Msg = C.GoString(&cci_error.err_msg[0])
 
 	return int(req), err
-}
-
-func Gci_disconnect(conn_handle int) (int, GCI_ERROR) {
-	var cHandle C.int = C.int(conn_handle)
-	var cci_error C.T_CCI_ERROR
-	var res C.int
-	var err GCI_ERROR
-
-	res = C.cci_disconnect(cHandle, &cci_error)
-	err.Code = int(cci_error.err_code)
-	err.Msg = C.GoString(&cci_error.err_msg[0])
-
-	return int(res), err
 }
 
 func Gci_close_req_handle(req_handle int) int {
