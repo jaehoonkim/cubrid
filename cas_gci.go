@@ -1,8 +1,8 @@
 package cubrid
 
 /*
-#cgo CFLAGS: -I../CUBRID/include
-#cgo LDFLAGS: -L../CUBRID/lib -lcascci -lnsl
+#cgo CFLAGS: -ICUBRID/include
+#cgo LDFLAGS: -LCUBRID/lib -lcascci -lnsl
 #include <stdio.h>
 #include <stdlib.h>
 #include "cas_cci.h"
