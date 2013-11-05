@@ -7,28 +7,11 @@ package cubrid
 #include <stdlib.h>
 #include "cas_cci.h"
 #include "cas_error.h"
-int ex_cci_connect(char *ip, int port, char *db_name, char *db_user, char *db_password) {
-	int con = cci_connect(ip, port, db_name, db_user, db_password);
-	return con;
-}
-
-char* ex_cci_get_result_info_name(T_CCI_COL_INFO* res_info, int index) {
-	return CCI_GET_RESULT_INFO_NAME(res_info, index);
-}
-
-T_CCI_U_TYPE ex_cci_get_result_info_type(T_CCI_COL_INFO* res_info, int index) {
-	return CCI_GET_RESULT_INFO_TYPE(res_info, index);
-}
-
-int ex_cci_is_set_type(T_CCI_U_TYPE type) {
-	return CCI_IS_SET_TYPE(type);
-}
-
-int ex_cci_is_collection_type(T_CCI_U_TYPE type) {
-	return CCI_IS_COLLECTION_TYPE(type);
-}
 */
 import "C"
+import (
+	"unsafe"
+)
 
 func gci_set_get_str(set GCI_SET, index int) (int, interface{}, int) {
 	var data C.T_CCI_SET = C.T_CCI_SET(set)
