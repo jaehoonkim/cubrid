@@ -36,6 +36,79 @@ import (
 	"reflect"
 	"log"
 )
+func Gci_bind_param() int {
+	//cci_bind_param
+	return 0
+}
+
+func Gci_bind_param_array() int {
+	//cci_bind_param_array
+	return 0
+}
+
+func Gci_bind_param_array_size(req_handle int, array_size int) int {
+	var cHandle C.int = C.int(req_handle)
+	var cSize C.int = C.int(array_size)
+	
+	res := C.cci_bind_param_array_size(cHandle, cSize)
+	
+	return int(res)
+}
+
+func Gci_blob_free(blob GCI_BLOB) {
+	var data C.T_CCI_BLOB = C.T_CCI_BLOB(blob)
+	C.cci_blob_free(data)
+}
+
+func Gci_blob_new(conn_handle int) (GCI_BLOB, GCI_ERROR) {
+	
+	return nil, nil
+}
+
+func Gci_blob_read(con_handle int, blob GCI_BLOB, start_pos int64, length int64) (GCI_BLOB, GCI_ERROR) {
+	var handle C.int = C.int(con_handle)
+	var res C.int
+	var c_start_pos C.longlong = C.longlong(start_pos)
+	var c_length C.int = C.int(length)
+	var c_blob string
+	var cci_error C.T_CCI_ERROR
+	var err GCI_ERROR
+	var data C.T_CCI_BLOB = C.T_CCI_BLOB(blob)
+	var res_blob GCI_BLOB
+
+	c_buf := C.CString(c_blob)
+	defer C.free(unsafe.Pointer(c_buf))
+	res = C.cci_blob_read(handle, data, c_start_pos, c_length, c_buf, &cci_error)
+	if res < C.int(0) {
+		err.Code = int(cci_error.err_code)
+		err.Msg = C.GoString(&cci_error.err_msg[0])
+	}
+
+	res_blob = GCI_BLOB(c_buf)
+
+	return res_blob, err
+}
+
+func Gci_blob_size(blob GCI_BLOB) int64 {
+	var size C.longlong
+	var data C.T_CCI_BLOB = C.T_CCI_BLOB(blob)
+
+	size = C.cci_blob_size(data)
+
+	return int64(size)
+}
+
+func Gci_blob_write() {
+
+}
+
+func Gci_cancel(conn_handle int) int {
+	var cHandle C.int = conn_handle
+	
+	res := C.cci_cancel(cHandle)
+	
+	return int(res)
+}
 
 func Gci_init() {
 	C.cci_init()
@@ -504,42 +577,3 @@ func Gci_get_data_blob(req_handle int, idx int) (int, GCI_BLOB, int) {
 
 	return int(res), data, int(indicator)
 }
-
-func Gci_blob_size(blob GCI_BLOB) int64 {
-	var size C.longlong
-	var data C.T_CCI_BLOB = C.T_CCI_BLOB(blob)
-
-	size = C.cci_blob_size(data)
-
-	return int64(size)
-}
-
-func Gci_blob_read(con_handle int, blob GCI_BLOB, start_pos int64, length int64) (GCI_BLOB, GCI_ERROR) {
-	var handle C.int = C.int(con_handle)
-	var res C.int
-	var c_start_pos C.longlong = C.longlong(start_pos)
-	var c_length C.int = C.int(length)
-	var c_blob string
-	var cci_error C.T_CCI_ERROR
-	var err GCI_ERROR
-	var data C.T_CCI_BLOB = C.T_CCI_BLOB(blob)
-	var res_blob GCI_BLOB
-
-	c_buf := C.CString(c_blob)
-	defer C.free(unsafe.Pointer(c_buf))
-	res = C.cci_blob_read(handle, data, c_start_pos, c_length, c_buf, &cci_error)
-	if res < C.int(0) {
-		err.Code = int(cci_error.err_code)
-		err.Msg = C.GoString(&cci_error.err_msg[0])
-	}
-
-	res_blob = GCI_BLOB(c_buf)
-
-	return res_blob, err
-}
-
-func Gci_blob_free(blob GCI_BLOB) {
-	var data C.T_CCI_BLOB = C.T_CCI_BLOB(blob)
-	C.cci_blob_free(data)
-}
-
