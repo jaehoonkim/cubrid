@@ -477,55 +477,6 @@ func Gci_get_data_set(req_handle int, idx int) (int, GCI_SET, int) {
 	return int(res), data, int(indicator)
 }
 
-func Gci_set_size(set GCI_SET) int {
-	var data C.T_CCI_SET = C.T_CCI_SET(set)
-	var res C.int
-
-	res = C.cci_set_size(data);
-
-	return int(res)
-}
-
-/*
-	set 버퍼 안에서의 index와 a_type
-	ex) {'a', 'b', 'c'}
-*/
-func Gci_set_get(set GCI_SET, index int, a_type GCI_A_TYPE) (int, interface{}, int) {
-	var indicator int
-	var res int
-	var data interface{}
-
-	switch a_type {
-	case A_TYPE_STR:
-		res, data, indicator = gci_set_get_str(set, index)
-	case A_TYPE_INT:
-		res, data, indicator = gci_set_get_int(set, index)
-	case A_TYPE_FLOAT:
-		res, data, indicator = gci_set_get_float(set, index)
-	case A_TYPE_DOUBLE:
-		res, data, indicator = gci_set_get_float(set, index)
-	case A_TYPE_BIT:
-		res, data, indicator = gci_set_get_bit(set, index)
-	case A_TYPE_DATE:
-		res, data, indicator = gci_set_get_date(set, index)
-	case A_TYPE_BIGINT:
-		res, data, indicator = gci_set_get_bigint(set, index)
-	// todo
-	//case A_TYPE_BLOB:
-	//	res, data, indicator = gci_set_get_blob(set, index)
-	//case A_TYPE_CLOB:
-	//	res, data, indicator = gci_set_get_clob(set, index)
-	}
-
-	return res, data, indicator
-}
-
-func Gci_set_free(set GCI_SET) {
-	var data C.T_CCI_SET = C.T_CCI_SET(set)
-
-	C.cci_set_free(data)
-}
-
 func Gci_get_data_date(req_handle int, idx int) (int, GCI_DATE, int) {
 	log.Println("gci_get_data_date_start")
 	var handle C.int = C.int(req_handle)
@@ -578,3 +529,53 @@ func Gci_get_data_blob(req_handle int, idx int) (int, GCI_BLOB, int) {
 
 	return int(res), data, int(indicator)
 }
+
+func Gci_set_free(set GCI_SET) {
+	var data C.T_CCI_SET = C.T_CCI_SET(set)
+
+	C.cci_set_free(data)
+}
+
+/*
+	set 버퍼 안에서의 index와 a_type
+	ex) {'a', 'b', 'c'}
+*/
+func Gci_set_get(set GCI_SET, index int, a_type GCI_A_TYPE) (int, interface{}, int) {
+	var indicator int
+	var res int
+	var data interface{}
+
+	switch a_type {
+	case A_TYPE_STR:
+		res, data, indicator = gci_set_get_str(set, index)
+	case A_TYPE_INT:
+		res, data, indicator = gci_set_get_int(set, index)
+	case A_TYPE_FLOAT:
+		res, data, indicator = gci_set_get_float(set, index)
+	case A_TYPE_DOUBLE:
+		res, data, indicator = gci_set_get_float(set, index)
+	case A_TYPE_BIT:
+		res, data, indicator = gci_set_get_bit(set, index)
+	case A_TYPE_DATE:
+		res, data, indicator = gci_set_get_date(set, index)
+	case A_TYPE_BIGINT:
+		res, data, indicator = gci_set_get_bigint(set, index)
+	// todo
+	//case A_TYPE_BLOB:
+	//	res, data, indicator = gci_set_get_blob(set, index)
+	//case A_TYPE_CLOB:
+	//	res, data, indicator = gci_set_get_clob(set, index)
+	}
+
+	return res, data, indicator
+}
+
+func Gci_set_size(set GCI_SET) int {
+	var data C.T_CCI_SET = C.T_CCI_SET(set)
+	var res C.int
+
+	res = C.cci_set_size(data);
+
+	return int(res)
+}
+
