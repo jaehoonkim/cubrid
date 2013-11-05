@@ -61,8 +61,9 @@ func Gci_blob_free(blob GCI_BLOB) {
 }
 
 func Gci_blob_new(conn_handle int) (GCI_BLOB, GCI_ERROR) {
+	var err GCI_ERROR
 	
-	return nil, nil
+	return nil, err
 }
 
 func Gci_blob_read(con_handle int, blob GCI_BLOB, start_pos int64, length int64) (GCI_BLOB, GCI_ERROR) {
@@ -103,7 +104,7 @@ func Gci_blob_write() {
 }
 
 func Gci_cancel(conn_handle int) int {
-	var cHandle C.int = conn_handle
+	var cHandle C.int = C.int(conn_handle)
 	
 	res := C.cci_cancel(cHandle)
 	
