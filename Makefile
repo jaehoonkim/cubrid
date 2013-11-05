@@ -12,11 +12,9 @@ copy :
 test :
 	$(G) test
 build :
-	cd driver; $(G) build
-	cd gci; $(G) build
+	$(G) build
 install :
-	cd driver; $(G) install
-	cd gci; $(G) install
+	$(G) install
 clean :
 	$(G) clean
 	rm -rf CUBRID
