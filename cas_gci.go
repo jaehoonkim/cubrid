@@ -1,8 +1,6 @@
 package cubrid
 
 /*
-#cgo CFLAGS: -Iinclude
-#cgo LDFLAGS: -Llib -lcascci -lnsl
 #include <stdio.h>
 #include <stdlib.h>
 #include "cas_cci.h"
@@ -30,12 +28,13 @@ int ex_cci_is_collection_type(T_CCI_U_TYPE type) {
 */
 import "C"
 import (
-	"unsafe"
-	"strconv"
 	"fmt"
-	"reflect"
 	"log"
+	"reflect"
+	"strconv"
+	"unsafe"
 )
+
 func Gci_bind_param() int {
 	//cci_bind_param
 	return 0
@@ -49,9 +48,9 @@ func Gci_bind_param_array() int {
 func Gci_bind_param_array_size(req_handle int, array_size int) int {
 	var cHandle C.int = C.int(req_handle)
 	var cSize C.int = C.int(array_size)
-	
+
 	res := C.cci_bind_param_array_size(cHandle, cSize)
-	
+
 	return int(res)
 }
 
@@ -62,7 +61,7 @@ func Gci_blob_free(blob GCI_BLOB) {
 
 func Gci_blob_new(conn_handle int) (GCI_BLOB, GCI_ERROR) {
 	var err GCI_ERROR
-	
+
 	return nil, err
 }
 
@@ -105,9 +104,9 @@ func Gci_blob_write() {
 
 func Gci_cancel(conn_handle int) int {
 	var cHandle C.int = C.int(conn_handle)
-	
+
 	res := C.cci_cancel(cHandle)
-	
+
 	return int(res)
 }
 
@@ -118,6 +117,7 @@ func Gci_init() {
 func Gci_end() {
 	C.cci_end()
 }
+
 /*
 func gci_get_version_string(string &str) int {
 }
@@ -214,7 +214,7 @@ func Gci_execute(req_handle int, flag int, max_col_size int) (int, GCI_ERROR) {
 	return int(res), err
 }
 
-func Gci_set_autocommit(conn_handle int autocommit_mode AUTOCOMMIT_MODE) int {
+func Gci_set_autocommit(conn_handle int, autocommit_mode AUTOCOMMIT_MODE) int {
 	var res C.int
 	var handle C.int = C.int(conn_handle)
 	var mode C.int = C.int(autocommit_mode)
@@ -279,8 +279,8 @@ func Gci_bind_param_int(req_handle int, index int, value interface{}, flag int) 
 	var res C.int
 
 	c_param := C.int(value.(int64))
-	res = C.cci_bind_param(handle, C.int(index), C.CCI_A_TYPE_INT, 
-				unsafe.Pointer(&c_param), C.CCI_U_TYPE_INT, C.char(flag))
+	res = C.cci_bind_param(handle, C.int(index), C.CCI_A_TYPE_INT,
+		unsafe.Pointer(&c_param), C.CCI_U_TYPE_INT, C.char(flag))
 
 	return int(res)
 }
@@ -290,8 +290,8 @@ func Gci_bind_param_string(req_handle int, index int, value interface{}, flag in
 	var res C.int
 
 	ss := fmt.Sprint(value)
-	res = C.cci_bind_param(handle, C.int(index), C.CCI_A_TYPE_STR, 
-				unsafe.Pointer(C.CString(ss)), C.CCI_U_TYPE_STRING, C.char(flag))
+	res = C.cci_bind_param(handle, C.int(index), C.CCI_A_TYPE_STR,
+		unsafe.Pointer(C.CString(ss)), C.CCI_U_TYPE_STRING, C.char(flag))
 
 	return int(res)
 }
@@ -301,8 +301,8 @@ func Gci_bind_param_float(req_handle int, index int, value interface{}, flag int
 	var res C.int
 
 	c_param := C.float(value.(float64))
-	res = C.cci_bind_param(handle, C.int(index), C.CCI_A_TYPE_FLOAT, 
-				unsafe.Pointer(&c_param), C.CCI_U_TYPE_FLOAT, C.char(flag))
+	res = C.cci_bind_param(handle, C.int(index), C.CCI_A_TYPE_FLOAT,
+		unsafe.Pointer(&c_param), C.CCI_U_TYPE_FLOAT, C.char(flag))
 
 	return int(res)
 }
@@ -336,13 +336,13 @@ func Gci_get_result_info(req_handle int) ([]GCI_COL_INFO, GCI_CUBRID_STMT, int) 
 
 func Gci_get_result_info_name(col_info []GCI_COL_INFO, idx int) string {
 	var result string
-	result = col_info[idx - 1].col_name
+	result = col_info[idx-1].col_name
 	return result
 }
 
 func Gci_get_result_info_type(col_info []GCI_COL_INFO, idx int) GCI_U_TYPE {
 	var result GCI_U_TYPE
-	result = col_info[idx - 1].u_type
+	result = col_info[idx-1].u_type
 	return result
 }
 
@@ -350,10 +350,10 @@ func Gci_is_collection_type(u_type GCI_U_TYPE) int {
 	var result int
 	// 이게 맞는건가????
 	res := (u_type) & GCI_CODE_COLLECTION
-	if( (res != 0) || ((u_type) == U_TYPE_SET) || ((u_type) == U_TYPE_MULTISET) || ((u_type) == U_TYPE_SEQUENCE) ) {
+	if (res != 0) || ((u_type) == U_TYPE_SET) || ((u_type) == U_TYPE_MULTISET) || ((u_type) == U_TYPE_SEQUENCE) {
 		result = 1
 	} else {
-		result =  0
+		result = 0
 	}
 	return result
 }
@@ -486,8 +486,8 @@ func Gci_get_data_date(req_handle int, idx int) (int, GCI_DATE, int) {
 	var indicator C.int
 	var data GCI_DATE
 
-	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_DATE, 
-				unsafe.Pointer(&buf), &indicator)
+	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_DATE,
+		unsafe.Pointer(&buf), &indicator)
 	data.yr = int(buf.yr)
 	data.mon = int(buf.mon)
 	data.day = int(buf.day)
@@ -495,7 +495,7 @@ func Gci_get_data_date(req_handle int, idx int) (int, GCI_DATE, int) {
 	data.mm = int(buf.mm)
 	data.ss = int(buf.ss)
 	data.ms = int(buf.ms)
-	
+
 	log.Println("gci_get_data_date_end")
 	return int(res), data, int(indicator)
 }
@@ -508,8 +508,8 @@ func Gci_get_data_bigint(req_handle int, idx int) (int, int64, int) {
 	var indicator C.int
 	var data int64
 
-	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_BIGINT, 
-				unsafe.Pointer(&buf), &indicator)
+	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_BIGINT,
+		unsafe.Pointer(&buf), &indicator)
 	data = int64(buf)
 
 	return int(res), data, int(indicator)
@@ -523,8 +523,8 @@ func Gci_get_data_blob(req_handle int, idx int) (int, GCI_BLOB, int) {
 	var indicator C.int
 	var data GCI_BLOB
 
-	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_BLOB, 
-				unsafe.Pointer(&buf), &indicator)
+	res = C.cci_get_data(handle, c_idx, C.CCI_A_TYPE_BLOB,
+		unsafe.Pointer(&buf), &indicator)
 	data = GCI_BLOB(buf)
 
 	return int(res), data, int(indicator)
@@ -560,11 +560,11 @@ func Gci_set_get(set GCI_SET, index int, a_type GCI_A_TYPE) (int, interface{}, i
 		res, data, indicator = gci_set_get_date(set, index)
 	case A_TYPE_BIGINT:
 		res, data, indicator = gci_set_get_bigint(set, index)
-	// todo
-	//case A_TYPE_BLOB:
-	//	res, data, indicator = gci_set_get_blob(set, index)
-	//case A_TYPE_CLOB:
-	//	res, data, indicator = gci_set_get_clob(set, index)
+		// todo
+		//case A_TYPE_BLOB:
+		//	res, data, indicator = gci_set_get_blob(set, index)
+		//case A_TYPE_CLOB:
+		//	res, data, indicator = gci_set_get_clob(set, index)
 	}
 
 	return res, data, indicator
@@ -574,8 +574,7 @@ func Gci_set_size(set GCI_SET) int {
 	var data C.T_CCI_SET = C.T_CCI_SET(set)
 	var res C.int
 
-	res = C.cci_set_size(data);
+	res = C.cci_set_size(data)
 
 	return int(res)
 }
-
