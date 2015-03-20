@@ -1,20 +1,14 @@
 
-G=go
-CUBRID_PATH=$(CUBRID)
+CGO_CFLAGS=-I$(CUBRID)/include
+CGO_LDFLAGS=-L$(CUBRID)/lib -lcascci -lnsl
+export CGO_CFLAGS
+export CGO_LDFLAGS
 
-copy :
-	-mkdir CUBRID
-	-mkdir CUBRID/lib
-	-mkdir CUBRID/include
-	cp $(CUBRID_PATH)/lib/libcascci.so ./CUBRID/lib
-	cp $(CUBRID_PATH)/include/cas_cci.h ./CUBRID/include
-	cp $(CUBRID_PATH)/include/cas_error.h ./CUBRID/include
 test :
-	$(G) test
+	go test
 build :
-	$(G) build
+	go build
 install :
-	$(G) install
+	go install
 clean :
-	$(G) clean
-	rm -rf CUBRID
+	go clean

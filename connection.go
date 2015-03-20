@@ -3,19 +3,20 @@ package cubrid
 import (
 	"database/sql/driver"
 	"fmt"
+
+	"github.com/jaehoonkim/cubrid/gci"
 )
 
 type cubridConn struct {
 	con int
 }
 
-
 func (c *cubridConn) Prepare(query string) (driver.Stmt, error) {
 	var req int
-	var err GCI_ERROR
-	stmt := &cubridStmt { c: c }
-	req, err = Gci_prepare(c.con, query, 0)
-	if req  < 0 {
+	var err gci.GCI_ERROR
+	stmt := &cubridStmt{c: c}
+	req, err = gci.Prepare(c.con, query, 0)
+	if req < 0 {
 		c.Close()
 		return nil, fmt.Errorf("error : %d, %s", err.Code, err.Msg)
 	}
@@ -24,9 +25,9 @@ func (c *cubridConn) Prepare(query string) (driver.Stmt, error) {
 }
 
 func (c *cubridConn) Close() error {
-	var err GCI_ERROR
+	var err gci.GCI_ERROR
 	var err_no int
-	err_no, err = Gci_disconnect(c.con)
+	err_no, err = gci.Disconnect(c.con)
 	if err_no < 0 {
 		return fmt.Errorf("error: %d, %s", err.Code, err.Msg)
 	}
@@ -39,9 +40,9 @@ func (c *cubridConn) Close() error {
 */
 func (c *cubridConn) Begin() (driver.Tx, error) {
 	var err int
-	err = Gci_set_autocommit(c.con, AUTOCOMMIT_FALSE)
+	err = gci.Set_autocommit(c.con, gci.AUTOCOMMIT_FALSE)
 	if err == 0 {
-		tx := &cubridTx{ c: c }
+		tx := &cubridTx{c: c}
 		return tx, nil
 	}
 	return nil, fmt.Errorf("cci_set_autocommit err : %d", err)
@@ -71,7 +72,6 @@ func (c *cubridConn) Query(query string, args []driver.Value) (driver.Rows, erro
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return rows, nil
 }
-

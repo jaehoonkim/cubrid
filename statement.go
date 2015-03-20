@@ -5,15 +5,17 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/jaehoonkim/cubrid/gci"
 )
 
 type cubridStmt struct {
-	c *cubridConn
+	c   *cubridConn
 	req int
 }
 
 func (s *cubridStmt) Close() error {
-	err := Gci_close_req_handle(s.req)
+	err := gci.Close_req_handle(s.req)
 	if err == 0 {
 		return nil
 	}
@@ -21,7 +23,7 @@ func (s *cubridStmt) Close() error {
 }
 
 func (s *cubridStmt) NumInput() int {
-	param_cnt := Gci_get_bind_num(s.req)
+	param_cnt := gci.Get_bind_num(s.req)
 	if param_cnt < 0 {
 		fmt.Errorf("cci_get_bind_num err : %d", param_cnt)
 	}
@@ -33,7 +35,7 @@ func (s *cubridStmt) Exec(args []driver.Value) (driver.Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	result := &cubridResult{ c: s.c }
+	result := &cubridResult{c: s.c}
 	return result, nil
 }
 
@@ -42,19 +44,19 @@ func (s *cubridStmt) Query(args []driver.Value) (driver.Rows, error) {
 	if err != nil {
 		return nil, err
 	}
-	rows := &cubridRows{ s: s }
+	rows := &cubridRows{s: s}
 	return rows, nil
 }
 
-func (s *cubridStmt) execute(args []driver.Value) (error) {
-	var gciError GCI_ERROR
+func (s *cubridStmt) execute(args []driver.Value) error {
+	var gciError gci.GCI_ERROR
 	if args != nil {
 		err := s.bindParam(args)
 		if err != nil {
 			return err
 		}
 	}
-	_, gciError = Gci_execute(s.req, 0, 0)
+	_, gciError = gci.Execute(s.req, 0, 0)
 	if gciError.Code < 0 {
 		return fmt.Errorf("cci_execute err: %d, %s", gciError.Code, gciError.Msg)
 	}
@@ -73,21 +75,21 @@ func (s *cubridStmt) bindParam(args []driver.Value) error {
 	for i, arg := range args {
 		switch arg.(type) {
 		case int64:
-			res = Gci_bind_param_int(s.req, i + 1, arg, GCI_BIND_PTR)
+			res = gci.Bind_param_int(s.req, i+1, arg, gci.GCI_BIND_PTR)
 			if res < 0 {
-				return fmt.Errorf("cci_bind_param : %d", res)
+				return fmt.Errorf("gci_bind_param : %d", res)
 			}
 		case string:
-			res = Gci_bind_param_string(s.req, i + 1, arg, GCI_BIND_PTR)
+			res = gci.Bind_param_string(s.req, i+1, arg, gci.GCI_BIND_PTR)
 			if res < 0 {
-				return fmt.Errorf("cci_bind_param : %d", res)
+				return fmt.Errorf("gci_bind_param : %d", res)
 			}
 		case time.Time:
 			log.Println("statement:bindParam:time.Tile")
 		case float64:
-			res = Gci_bind_param_float(s.req, i + 1, arg, GCI_BIND_PTR)
+			res = gci.Bind_param_float(s.req, i+1, arg, gci.GCI_BIND_PTR)
 			if res < 0 {
-				return fmt.Errorf("cci_bind_param : %d", res)
+				return fmt.Errorf("gci_bind_param : %d", res)
 			}
 		case bool:
 			log.Println("statement:bindParam:bool")
@@ -99,4 +101,3 @@ func (s *cubridStmt) bindParam(args []driver.Value) error {
 	}
 	return nil
 }
-
