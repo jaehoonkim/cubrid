@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/jaehoonkim/cubrid/gci"
+	"gci"
 )
 
 type cubridStmt struct {

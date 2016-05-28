@@ -6,7 +6,7 @@ import (
 	"io"
 	"log"
 
-	"github.com/jaehoonkim/cubrid/gci"
+	"gci"
 )
 
 type cubridRows struct {

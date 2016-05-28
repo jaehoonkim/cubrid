@@ -4,7 +4,7 @@ import (
 	"database/sql/driver"
 	"fmt"
 
-	"github.com/jaehoonkim/cubrid/gci"
+	"gci"
 )
 
 type cubridConn struct {

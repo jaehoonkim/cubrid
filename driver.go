@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jaehoonkim/cubrid/gci"
+	"gci"
 )
 
 type cubridDriver struct{}
