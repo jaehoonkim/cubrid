@@ -3,7 +3,7 @@ package cubrid
 import (
 	"fmt"
 
-	"github.com/jaehoonkim/cubrid/gci"
+	"gci"
 )
 
 type cubridResult struct {
